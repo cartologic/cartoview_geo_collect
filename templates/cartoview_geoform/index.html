@@ -1,0 +1,29 @@
+{% load viewer_helper_tags %}
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Cartoview - TEST</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" >
+  <link rel="shortcut icon" type="image/png" href="{{ STATIC_URL }}cartoview/img/icon.png"/>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" >
+<body>
+  <div class="container">
+    <div class="row" id="main-ct"></div>
+  </div>
+  <script type="text/javascript">
+    var URLS = {
+      geoserver: "{{ GEOSERVER_BASE_URL }}",
+      //{% if PROXY_URL %}
+      proxy: "{{ PROXY_URL }}",
+      //{% endif %}
+      static: "{{ STATIC_URL }}",
+      media: "{{ MEDIA_URL }}",
+      rest: "{% url 'app_manager_base_url' %}rest/app_manager/",
+      geonodeRest: "{% url 'api_api_top_level' 'api' %}"
+    };
+  </script>
+  <script src="{{ STATIC_URL }}geoform/dist/geoform.js?v={{v}}"></script>
+</body>
+</html>

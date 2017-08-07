@@ -1,0 +1,49 @@
+body {
+    padding-top: 80px;
+}
+
+.form-control {
+    border-radius: 0;
+    color: #464a4c;
+    background-color: #fff;
+    background-image: none;
+    -webkit-background-clip: padding-box;
+    background-clip: padding-box;
+    border: 1px solid rgba(0, 0, 0, .15);
+}
+
+.loading {
+    border-radius: 100%;
+    border: 3px solid rgba(255, 255, 255, .6);
+    border-top-color: rgba(255, 255, 255, 1);
+    box-sizing: border-box;
+    height: 30px;
+    width: 30px;
+    -webkit-animation: spin .7s linear infinite;
+    animation: spin 2s linear infinite;
+}
+
+.btn .loading {
+    height: 16px;
+    width: 16px;
+    float: left;
+    margin: 2px 4px;
+}
+
+.featureListMap {
+    width: 70%;
+    height: 400px
+}
+
+@-webkit-keyframes spin {
+    100% {
+        -webkit-transform: rotate(360deg);
+    }
+}
+
+@keyframes spin {
+    100% {
+        -webkit-transform: rotate(360deg);
+        transform: rotate(360deg);
+    }
+}

@@ -1,0 +1,76 @@
+<md-dialog aria-label="{{attribute.name}} ({{attribute.label}})"  ng-cloak>
+    <form>
+        <md-toolbar>
+            <div class="md-toolbar-tools">
+                <h2>{{attribute.name}} ({{attribute.label}})</h2>
+                <!--<span flex></span>-->
+                <!--<md-button class="md-icon-button" ng-click="cancel()">-->
+                    <!--<md-icon class="material-icon" aria-label="Close dialog">close</md-icon>-->
+                <!--</md-button>-->
+            </div>
+        </md-toolbar>
+        <md-dialog-content>
+            <div class="md-dialog-content">
+                <md-input-container>
+                    <label>Name</label>
+                    <input type="text" ng-model="attribute.name" ng-disabled="true">
+                </md-input-container>
+                <md-input-container>
+                    <label>Data Type</label>
+                    <input type="text" ng-model="attribute.dataType" ng-disabled="true">
+                </md-input-container>
+
+                <md-input-container class="md-block" flex-gt-sm>
+                    <label>Label</label>
+                    <input type="text" ng-model="attribute.label">
+                </md-input-container>
+                <md-input-container class="md-block" flex-gt-sm>
+                    <label>Help Text</label>
+                    <input type="text" ng-model="attribute.helpText">
+                </md-input-container>
+                <md-input-container class="md-block" flex-gt-sm>
+                    <label>Field Type</label>
+                    <md-select ng-model="attribute.fieldType">
+                        <md-option ng-repeat="t in fieldTypes" value="{{ t.name }}">{{ t.label }}</md-option>
+                    </md-select>
+                </md-input-container>
+                <div ng-if="isMultibleChoice(attribute.fieldType)" class="cs-config">
+                    <md-subheader class="md-no-sticky">Options</md-subheader>
+                    <!--<md-list-item ng-repeat="o in attribute.options">-->
+                    <!--<p>{{o.label}}</p>-->
+                    <!--<md-icon class="material-icons " ng-click="remove($event)">delete</md-icon>-->
+                    <!--<md-icon class="material-icons " ng-click="remove($event)">edit</md-icon>-->
+                    <!--</md-list-item>-->
+                    <!--<md-list-item>-->
+                    <!--<md-icon class="material-icons md-secondary" ng-click="attribute.options.push({value:attribute.options.length + 1,label:'Option ' + (attribute.options.length + 1)})" >add</md-icon>-->
+                    <!--</md-list-item>-->
+
+                    <md-card ng-repeat="o in attribute.options" flex>
+                        <md-card-actions layout="row" >
+                            <label>Label: </label><input type="text" ng-model="o.label">
+                            <label>value: </label><input type="text" ng-model="o.value">
+                            <p flex></p>
+                            <md-button class="md-icon-button" aria-label="settings" ng-click="attribute.options.splice($index, 1)">
+                                <md-icon class="material-icons">delete</md-icon>
+                            </md-button>
+                        </md-card-actions>
+                    </md-card>
+                    <md-card flex>
+                        <md-card-actions layout="row" layout-align="end center">
+                            <p flex></p>
+                            <md-button class="md-icon-button"
+                                       ng-click="attribute.options.push({value:attribute.options.length + 1,label:'Option ' + (attribute.options.length + 1)})"
+                                       aria-label="settings">
+                                <md-icon class="material-icons">add</md-icon>
+                            </md-button>
+                        </md-card-actions>
+                    </md-card>
+                </div>
+            </div>
+        </md-dialog-content>
+        <md-dialog-actions layout="row">
+            <span flex></span>
+            <md-button class="md-primary" ng-click="cancel()">Ok</md-button>
+        </md-dialog-actions>
+    </form>
+</md-dialog>

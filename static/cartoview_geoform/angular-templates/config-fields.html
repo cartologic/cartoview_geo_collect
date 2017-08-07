@@ -1,0 +1,44 @@
+<div class="cs-config">
+    <md-input-container class="md-block" flex-gt-sm>
+        <label>Select Layer</label>
+        <md-select ng-model="config.layer" ng-change="changeLayer()">
+            <md-option ng-repeat="layerInfo in mapLayers" value="{{layerInfo.name}}">
+            {{layerInfo.title}}
+            </md-option>
+        </md-select>
+    </md-input-container>
+    <div ng-show="config.layer" layout="column" layout-fill>
+        <md-input-container class="md-block" flex-gt-sm >
+            <label>List Item Template</label>
+            <input ng-model="config.listItemTpl">
+        </md-input-container>
+        <label>Form Fields</label>
+        <div dnd-list="config.attributes">
+            <md-card flex
+                     ng-repeat="a in config.attributes"
+                     dnd-draggable="a"
+                     dnd-moved="config.attributes.splice($index, 1)"
+                     dnd-effect-allowed="move">
+                <md-card-actions layout="row" layout-align="end center">
+                    <md-checkbox ng-model="a.included"></md-checkbox>
+                    <p flex>
+                        {{ a.name }} ({{a.label}})
+                    </p>
+                    <md-button class="md-icon-button" ng-click="showAttributeSettings($event, a)" aria-label="settings">
+                        <md-icon class="material-icons">settings</md-icon>
+                    </md-button>
+                </md-card-actions>
+            </md-card>
+        </div>
+        <md-content md-whiteframe="1">
+            <md-checkbox ng-model="config.attachments.enabled">Enable attachments</md-checkbox>
+            <div ng-if="config.attachments.enabled">
+                <md-input-container>
+                    <label>Attachment Field Label</label>
+                    <input type="text" ng-model="config.attachments.label" >
+                </md-input-container>
+                <md-checkbox ng-model="config.attachments.multiple" aria-label="Enable">Multiple attachments</md-checkbox>
+            </div>
+        </md-content>
+    </div>
+</div>
