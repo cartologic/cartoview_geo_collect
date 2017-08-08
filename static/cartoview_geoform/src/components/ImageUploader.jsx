@@ -1,20 +1,28 @@
 import FileBase64 from 'react-file-base64'
+import PropTypes from 'prop-types'
 import React from 'react'
 export default class ImageUploader extends React.Component {
-    constructor() {
-        super()
+    constructor( ) {
+        super( )
         this.state = {
-            file: null
+            file: null,
+            messages: ""
         }
     }
-    getFiles(file) {
-        this.setState({ file: file }, () => console.log(this.state.file))
+    getFiles( file ) {
+        let imageRegx = new RegExp( '^image\/*', 'i' )
+        if ( imageRegx.test( file.type ) ) {
+            this.setState( { file: file, messages: "" }, ( ) =>
+                console.log( this.state.file ) )
+        } else {
+            this.setState( { messages: "this file isn't an image" } )
+        }
     }
-    save = () => {
-
+    save = ( ) => {
+        this.props.onComplete({logo:this.state.file})
     }
-    render() {
-        let { file } = this.state
+    render( ) {
+        let { file, messages } = this.state
         return (
             <div className="col-xs-12 col-sm-12 col-md-12">
                 <div className="row">
@@ -28,7 +36,7 @@ export default class ImageUploader extends React.Component {
                                 margin: "0px 3px 0px 3px"
                             }}
                             className="btn btn-primary btn-sm pull-right"
-                            onClick={() => this.save.bind(this)}>{"next "}
+                            onClick={this.save}>{"next "}
                             <i className="fa fa-arrow-right"></i>
                         </button>}
                         {!file && <button
@@ -37,7 +45,7 @@ export default class ImageUploader extends React.Component {
                                 margin: "0px 3px 0px 3px"
                             }}
                             className="btn btn-primary btn-sm pull-right disabled"
-                            onClick={() => this.save.bind(this)}>{"next "}
+                            onClick={this.save}>{"next "}
                             <i className="fa fa-arrow-right"></i>
                         </button>}
 
@@ -55,13 +63,19 @@ export default class ImageUploader extends React.Component {
                 <FileBase64
                     multiple={false}
                     onDone={this.getFiles.bind(this)} />
+                <h4 style={{color:"red"}}>{messages}</h4>
                 {file && <div className="row" style={{ marginTop: "5%" }}>
                     <div className="col-xs-12 col-sm-12 col-md-6 col-md-offset-3">
                         <img className="img-responsive" src={file.base64} />
                     </div>
                 </div>}
             </div>
-
         )
     }
+}
+ImageUploader.propTypes = {
+    onComplete: PropTypes.func.isRequired,
+    onPrevious: PropTypes.func.isRequired,
+    config: PropTypes.object,
+    urls: PropTypes.object.isRequired,
 }

@@ -67,6 +67,7 @@ export default class Edit extends Component {
                     config: this.props.config.instance ? this.props.config
                         .instance.config : null,
                     onComplete: (basicConfig) => {
+                        console.log(this.state.config)
                         let { step } = this.state
                         this.setState({
                             config: Object.assign(this.state
@@ -128,13 +129,12 @@ export default class Edit extends Component {
                 label: "Logo",
                 component: ImageUploader,
                 props: {
-                    map: this.state.selectedResource,
                     config: this.props.config.instance ? this.props.config
                         .instance.config : null,
                     urls: this.props.config.urls,
                     onComplete: (Image) => {
                         let { step, config } = this.state
-                        Object.assign(config, Image)
+                        Object.assign(config.config, Image)
                         this.setState({
                             config: config
                         }, this.goToStep(++step))
@@ -157,6 +157,7 @@ export default class Edit extends Component {
                     success: this.state.success,
                     onComplete: (basicConfig) => {
                         var { step, config } = this.state
+                        console.log(config)
                         let newConfig = Object.assign(config.config,
                             basicConfig)
                         this.setState({

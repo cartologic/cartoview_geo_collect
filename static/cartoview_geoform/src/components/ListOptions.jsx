@@ -1,4 +1,7 @@
-import React, { Component } from 'react';
+import React, { Component } from 'react'
+
+import PropTypes from 'prop-types'
+
 export default class ListOptions extends Component {
     constructor( props ) {
         super( props )
@@ -6,7 +9,10 @@ export default class ListOptions extends Component {
             layers: [ ],
             loading: true,
             selectedLayer: this.props.config ? this.props.config.layer : null,
-            selectedAttribute: this.props.config ? this.props.config.attribute : null,
+            selectedTitleAttribute: this.props.config ? this.props.config
+                .titleAttribute : null,
+            selectedSubtitleAttribute: this.props.config ? this.props.config
+                .subtitleAttribute : null,
             attributes: [ ]
         }
     }
@@ -17,10 +23,19 @@ export default class ListOptions extends Component {
             }, this.loadAttributes( ) )
         }
     }
-    selectAttribute( ) {
-        if ( this.refs.selectedAttribute.value !== "" ) {
+    selectTitleAttribute( ) {
+        if ( this.refs.selectedTitleAttribute.value !== "" ) {
             this.setState( {
-                selectedAttribute: this.refs.selectedAttribute.value
+                selectedAttribute: this.refs.selectedTitleAttribute
+                    .value
+            } )
+        }
+    }
+    selectSubtitleAttribute( ) {
+        if ( this.refs.selectedSubtitleAttribute.value !== "" ) {
+            this.setState( {
+                selectedAttribute: this.refs.selectedSubtitleAttribute
+                    .value
             } )
         }
     }
@@ -64,7 +79,8 @@ export default class ListOptions extends Component {
         this.props.onComplete( {
             config: {
                 layer: this.state.selectedLayer,
-                attribute: this.state.selectedAttribute
+                titleAttribute: this.state.selectedTitleAttribute,
+                subtitleAttribute: this.state.selectedSubtitleAttribute,
             }
         } )
     }
@@ -77,20 +93,20 @@ export default class ListOptions extends Component {
 					<div className="col-xs-7 col-md-8">
 						<button
 							style={{
-							display: "inline-block",
-							margin: "0px 3px 0px 3px"
-						}}
+								display: "inline-block",
+								margin: "0px 3px 0px 3px"
+							}}
 							className="btn btn-primary btn-sm pull-right"
-							onClick={this.handleSubmit.bind( this )}>{"next "}
+							onClick={this.handleSubmit.bind(this)}>{"next "}
 							<i className="fa fa-arrow-right"></i>
 						</button>
 						<button
 							style={{
-							display: "inline-block",
-							margin: "0px 3px 0px 3px"
-						}}
+								display: "inline-block",
+								margin: "0px 3px 0px 3px"
+							}}
 							className="btn btn-primary btn-sm pull-right"
-							onClick={( ) => this.props.onPrevious( )}>
+							onClick={() => this.props.onPrevious()}>
 							<i className="fa fa-arrow-left"></i>{" Previous"}</button>
 					</div>
 				</div>
@@ -102,7 +118,7 @@ export default class ListOptions extends Component {
 					</div>
 				</div>
 				<hr></hr>
-				<form onSubmit={this.save.bind( this )}>
+				<form onSubmit={this.save.bind(this)}>
 					{!loading && <div className="form-group">
 						<label htmlFor="layer-select">Layer</label>
 						<select
@@ -110,27 +126,46 @@ export default class ListOptions extends Component {
 							id="layer-select"
 							ref="selectedLayer"
 							defaultValue={this.state.selectedLayer}
-							onChange={this.selectLayer.bind( this )}
+							onChange={this.selectLayer.bind(this)}
 							required>
 							<option value="">Choose Layer</option>
-							{layers.length > 0 && layers.map(( layer, i ) => {
+							{layers.length > 0 && layers.map((layer, i) => {
 								return <option value={layer.typename} key={i}>{layer.name}</option>
 							})}
 						</select>
 					</div>}
 					{layers.length == 0 && !loading && <b>No Point Layers In this Map Please Select a Map With Point Layer</b>}
 					{!loading && selectedLayer && <div className="form-group">
-						<label htmlFor="attribute-select">Attribute to Display</label>
+						<label htmlFor="attribute-select">Attribute as title</label>
 						<select
 							className="form-control"
 							id="attribute-select"
-							ref="selectedAttribute"
+							ref="selectedTitleAttribute"
 							defaultValue={this.state.selectedAttribute}
-							onChange={this.selectAttribute.bind( this )}
+							onChange={this.selectTitleAttribute.bind(this)}
 							required>
 							<option value="">Choose Attribute</option>
-							{attributes.length > 0 && attributes.map(( attribute, i ) => {
-								if ( attribute.attribute_type.indexOf( "gml:" ) == -1 ) {
+							{attributes.length > 0 && attributes.map((attribute, i) => {
+								if (attribute.attribute_type.indexOf("gml:") == -1) {
+									return <option key={i} value={attribute.attribute}>
+										{attribute.attribute || attribute.attribute_label}
+									</option>
+								}
+							})}
+						</select>
+					</div>}
+					{!loading && selectedLayer && <div className="form-group">
+						<label htmlFor="attribute-select">Attribute as subtitle</label>
+						<select
+							className="form-control"
+							id="attribute-select"
+							ref="selectedSubtitleAttribute"
+							defaultValue={this.state.selectedAttribute}
+							onChange={this.selectSubtitleAttribute.bind(this)}
+							required>
+							<option value="">Choose Attribute</option>
+							{attributes.length > 0 && attributes.map((attribute, i) => {
+								if (attribute.attribute_type.indexOf("gml:") == -1) {
 									return <option key={i} value={attribute.attribute}>
 										{attribute.attribute || attribute.attribute_label}
 									</option>
@@ -141,8 +176,8 @@ export default class ListOptions extends Component {
 
 					<button
 						style={{
-						display: 'none'
-					}}
+							display: 'none'
+						}}
 						ref="submitButton"
 						type="submit"
 						value="submit"
@@ -151,4 +186,12 @@ export default class ListOptions extends Component {
 			</div>
         )
     }
+}
+ListOptions.propTypes = {
+    onComplete: PropTypes.func.isRequired,
+    setAttributes: PropTypes.func.isRequired,
+    onPrevious: PropTypes.func.isRequired,
+    config: PropTypes.object,
+    urls: PropTypes.object.isRequired,
+    map: PropTypes.object.isRequired,
 }

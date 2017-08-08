@@ -195,6 +195,7 @@ class GeoForm extends Component {
     }
     toggleComponent = (component) => {
         let { currentComponent } = this.state
+
         if (currentComponent != component) {
             this.setState({ currentComponent: component })
         }
