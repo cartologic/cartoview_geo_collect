@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 
 import t from 'tcomb-form';
+
 // const zoomControls = t.struct({   duration: t.Number,   ZoomInTip: t.String,
 // delta: t.Number,   ZoomOutTip: t.String, })
 //
@@ -73,7 +74,7 @@ export default class NavigationTools extends Component {
 							margin: "0px 3px 0px 3px"
 						}}
 							className="btn btn-primary btn-sm pull-right disabled"
-							onClick={this.save.bind( this )}>{"next >>"}</button>
+							onClick={this.save.bind( this )}>{"next "}<i className="fa fa-arrow-right"></i></button>
 
 						<button
 							style={{
@@ -81,7 +82,7 @@ export default class NavigationTools extends Component {
 							margin: "0px 3px 0px 3px"
 						}}
 							className="btn btn-primary btn-sm pull-right"
-							onClick={( ) => this.props.onPrevious( )}>{"<< Previous"}</button>
+							onClick={( ) => this.props.onPrevious( )}><i className="fa fa-arrow-left"></i>{" Previous"}</button>
 					</div>
 				</div>
 				<div className="row" style={{

@@ -1,6 +1,8 @@
+// import 'react-select/dist/react-select.css'
 import React, { Component } from 'react'
 
 import PropTypes from 'prop-types'
+import Select from 'react-select'
 
 export default class ListOptions extends Component {
     constructor( props ) {
@@ -13,8 +15,22 @@ export default class ListOptions extends Component {
                 .titleAttribute : null,
             selectedSubtitleAttribute: this.props.config ? this.props.config
                 .subtitleAttribute : null,
-            attributes: [ ]
+            pagination: this.props.config ? this.props.config.pagination : null,
+            attributes: [ ],
+            searchOptions: [ ],
+			filters: [ ],
+			messages:null
         }
+    }
+    attributesOption = ( ) => {
+        let options = [ ]
+        this.state.attributes.forEach( ( attribute ) => {
+            if ( attribute.attribute_type.indexOf( "gml:" ) == -1 ) {
+                options.push( { value: attribute.attribute, label: attribute
+                        .attribute } )
+            }
+        } )
+        this.setState( { searchOptions: options } )
     }
     selectLayer( ) {
         if ( this.refs.selectedLayer.value ) {
@@ -26,7 +42,7 @@ export default class ListOptions extends Component {
     selectTitleAttribute( ) {
         if ( this.refs.selectedTitleAttribute.value !== "" ) {
             this.setState( {
-                selectedAttribute: this.refs.selectedTitleAttribute
+                selectedTitleAttribute: this.refs.selectedTitleAttribute
                     .value
             } )
         }
@@ -34,8 +50,16 @@ export default class ListOptions extends Component {
     selectSubtitleAttribute( ) {
         if ( this.refs.selectedSubtitleAttribute.value !== "" ) {
             this.setState( {
-                selectedAttribute: this.refs.selectedSubtitleAttribute
+                selectedSubtitleAttribute: this.refs.selectedSubtitleAttribute
                     .value
+            } )
+        }
+    }
+    selectPagination( ) {
+        if ( this.refs.selectedPagination.value !== "" ) {
+            console.log( this.refs.selectedPagination.value )
+            this.setState( {
+                pagination: this.refs.selectedPagination.value
             } )
         }
     }
@@ -46,10 +70,11 @@ export default class ListOptions extends Component {
             fetch( this.props.urls.layerAttributes + "?layer__typename=" +
                 typename ).then( ( response ) => response.json( ) ).then(
                 ( data ) => {
-                    this.setState( { attributes: data.objects } )
+                    this.setState( { attributes: data.objects }, ( ) => { this
+                            .attributesOption( ) } )
                 } ).catch( ( error ) => {
-                console.error( error );
-            } );
+                console.error( error )
+            } )
         }
     }
     loadLayers( ) {
@@ -58,14 +83,22 @@ export default class ListOptions extends Component {
             let pointLayers = data.objects.filter( ( layer ) => {
                 return layer.layer_type.toLowerCase( ).includes(
                     "point" )
-            } );
+            } )
             this.setState( { layers: pointLayers, loading: false } )
         } ).catch( ( error ) => {
-            console.error( error );
-        } );
+            console.error( error )
+        } )
+    }
+    handleSelectChange = ( value ) => {
+        this.setState( { filters: value ,messages:null} )
     }
     handleSubmit( ) {
-        this.refs.submitButton.click( )
+		if(this.state.filters.length>0){
+			this.refs.submitButton.click( )
+		}else{
+			this.setState({messages:"Please Select Search Attribute"})
+		}
+        
     }
     componentDidMount( ) {
         this.loadLayers( )
@@ -74,18 +107,20 @@ export default class ListOptions extends Component {
         }
     }
     save( e ) {
-        e.preventDefault( );
+        e.preventDefault( )
         this.props.setAttributes( this.state.attributes )
         this.props.onComplete( {
             config: {
                 layer: this.state.selectedLayer,
                 titleAttribute: this.state.selectedTitleAttribute,
                 subtitleAttribute: this.state.selectedSubtitleAttribute,
+				pagination: this.state.pagination,
+				filters:this.state.filters
             }
         } )
     }
     render( ) {
-        let { layers, loading, attributes, selectedLayer } = this.state;
+        let { layers, loading, attributes, selectedLayer } = this.state
         return (
             <div className="row">
 				<div className="row">
@@ -136,12 +171,12 @@ export default class ListOptions extends Component {
 					</div>}
 					{layers.length == 0 && !loading && <b>No Point Layers In this Map Please Select a Map With Point Layer</b>}
 					{!loading && selectedLayer && <div className="form-group">
-						<label htmlFor="attribute-select">Attribute as title</label>
+						<label htmlFor="attribute-select">Title Attribute</label>
 						<select
 							className="form-control"
 							id="attribute-select"
 							ref="selectedTitleAttribute"
-							defaultValue={this.state.selectedAttribute}
+							defaultValue={this.state.selectedTitleAttribute}
 							onChange={this.selectTitleAttribute.bind(this)}
 							required>
 							<option value="">Choose Attribute</option>
@@ -155,12 +190,12 @@ export default class ListOptions extends Component {
 						</select>
 					</div>}
 					{!loading && selectedLayer && <div className="form-group">
-						<label htmlFor="attribute-select">Attribute as subtitle</label>
+						<label htmlFor="attribute-select">Subtitle Attribute</label>
 						<select
 							className="form-control"
 							id="attribute-select"
 							ref="selectedSubtitleAttribute"
-							defaultValue={this.state.selectedAttribute}
+							defaultValue={this.state.selectedSubtitleAttribute}
 							onChange={this.selectSubtitleAttribute.bind(this)}
 							required>
 							<option value="">Choose Attribute</option>
@@ -173,7 +208,30 @@ export default class ListOptions extends Component {
 							})}
 						</select>
 					</div>}
+					{!loading && selectedLayer && <div className="form-group">
+						<label htmlFor="pagination-select">Features Per Page</label>
+						<select
+							className="form-control"
+							id="pagination-select"
+							ref="selectedPagination"
+							defaultValue={this.state.pagination}
+							onChange={this.selectPagination.bind(this)}
+							required>
+							<option value="">Choose Number Of Features</option>
+							<option value="10">10</option>
+							<option value="20">20</option>
+							<option value="50">50</option>
+							<option value="80">80</option>
+							<option value="100">100</option>
+						</select>
+					</div>}
 
+					<Select
+						multi={true}
+						onChange={this.handleSelectChange}
+						value={this.state.filters}
+						options={this.state.searchOptions} />
+					{this.state.messages && <small style={{color:"red"}}>{this.state.messages}</small>}
 					<button
 						style={{
 							display: 'none'
@@ -182,6 +240,7 @@ export default class ListOptions extends Component {
 						type="submit"
 						value="submit"
 						className="btn btn-primary">Save</button>
+
 				</form>
 			</div>
         )

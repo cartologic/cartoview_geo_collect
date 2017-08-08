@@ -51,3 +51,7 @@
 .switch.on {
     background: #2c689c!important;
 }
+.form-control[disabled], .form-control[readonly], fieldset[disabled] .form-control {
+    background-color: #fff;
+    opacity: 1;
+}

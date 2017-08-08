@@ -2,10 +2,10 @@ import FileBase64 from 'react-file-base64'
 import PropTypes from 'prop-types'
 import React from 'react'
 export default class ImageUploader extends React.Component {
-    constructor( ) {
-        super( )
+    constructor( props) {
+        super( props )
         this.state = {
-            file: null,
+            file: this.props.config ? this.props.config.logo : null,
             messages: ""
         }
     }

@@ -89,7 +89,6 @@ class MapViewer extends React.Component {
             xy
         } = this.props;
         if (xy) {
-            console.log(xy);
             const coords = ol.proj.transform([
                 parseFloat(xy.x),
                 parseFloat(xy.y)

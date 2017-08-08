@@ -1,14 +1,15 @@
 import FeatureListMap from "./FeatureListMap"
+import Img from 'react-image'
 import MapConfigService from '@boundlessgeo/sdk/services/MapConfigService'
 import MapConfigTransformService from '@boundlessgeo/sdk/services/MapConfigTransformService'
-import PropTypes from 'prop-types';
+import PropTypes from 'prop-types'
 import React from 'react'
 import Spinner from "react-spinkit"
 import UltimatePaginationBootstrap3 from './BootstrapPaginate'
 import WMSService from '@boundlessgeo/sdk/services/WMSService'
+import noImage from '../img/no-img.png'
 import ol from 'openlayers'
 import { wfsQueryBuilder } from "../helpers/helpers.jsx"
-
 const image = new ol.style.Circle({
     radius: 5,
     fill: null,
@@ -81,14 +82,17 @@ export default class FeatureList extends React.Component {
             totalFeatures: 0,
             selectMode: false,
             selectedFeatures: [],
-            perPage: 50,
+            perPage: parseInt(this.props.pagination),
             currentPage: 1,
             selectionLayerAdded: false,
             drawerOpen: true,
             config: { mapId: this.props.mapId }
         }
         this.map = new ol.Map({
-            layers: [new ol.layer.Tile({ title: 'OpenStreetMap', source: new ol.source.OSM() })],
+            layers: [new ol.layer.Tile({
+                title: 'OpenStreetMap',
+                source: new ol.source.OSM()
+            })],
             view: new ol.View({
                 center: [
                     0, 0
@@ -112,6 +116,20 @@ export default class FeatureList extends React.Component {
             })
         })
     }
+    search = () => {
+        const layerInfo = this.props.layer.split(":")
+        var request = new ol.format.WFS().writeGetFeature({
+            srsName: this.map.getView()
+                .getProjection().getCode(),
+            featureNS: 'http://www.geonode.org/',
+            featurePrefix: layerInfo[0],
+            outputFormat: 'application/json',
+            featureTypes: [layerInfo[1]],
+            filter: ol.format.filter.like('name',
+                'Mississippi*'),
+        });
+        console.log(new XMLSerializer().serializeToString(request))
+    }
     init(map) {
         map.on('singleclick', (e) => {
             document.body.style.cursor = "progress"
@@ -121,7 +139,8 @@ export default class FeatureList extends React.Component {
                     result) => {
                     if (result.features.length == 1) {
                         result.features[0].getGeometry()
-                            .transform('EPSG:4326', this.map.getView().getProjection()
+                            .transform('EPSG:4326', this.map
+                                .getView().getProjection()
                             )
                         this.zoomToFeature(result.features[
                             0])
@@ -136,8 +155,8 @@ export default class FeatureList extends React.Component {
                             feature.getGeometry()
                                 .transform(
                                 'EPSG:4326',
-                                this.map
-                                    .getView().getProjection()
+                                this.map.getView()
+                                    .getProjection()
                                 )
                             transformedFeatures.push(
                                 feature)
@@ -163,14 +182,16 @@ export default class FeatureList extends React.Component {
                 }
             }).then((config) => {
                 if (config) {
-                    MapConfigService.load(MapConfigTransformService.transform(config), this.map)
-
+                    MapConfigService.load(
+                        MapConfigTransformService.transform(
+                            config), this.map)
                 }
             })
         }
     }
     componentWillMount() {
         this.updateMap(this.state.config)
+        this.search()
     }
     getLayers(layers) {
         var children = []
@@ -243,11 +264,29 @@ export default class FeatureList extends React.Component {
         return (
             <div>
                 {loading && <div style={{ textAlign: "center" }} className="col-xs-12 col-sm-12 col-md-12"><Spinner className="loading-center" name="line-scale-party" color="steelblue" /></div>}
-                {!loading && !this.state.selectMode && <ul className="list-group">
-                    {this.state.features.map((feature, i) => {
-                        return <li key={i} onClick={this.zoomToFeature.bind(this, feature)} className="list-group-item">{feature.getProperties()[this.props.attribute]}</li>
-                    })}
-                </ul>}
+                {!loading && !this.state.selectMode && this.state.features.map((feature, i) => {
+                    return <div key={i}><div onClick={this.zoomToFeature.bind(this, feature)} className="row" >
+                        <div className="col-md-2" style={{ textAlign: "center" }}>
+                            <Img
+                                src={[
+                                    'https://www.example.com/foo.jpg',
+                                    noImage
+                                ]}
+                                loader={<Spinner className="loading-center" name="line-scale-party" color="steelblue" />}
+                                className="img-responsive img-thumbnail"
+                                style={{ height: 80 }}
+
+                            />
+                        </div>
+                        <div className="col-md-10">
+                            <h4>{feature.getProperties()[this.props.titleAttribute]}</h4>
+                            <p>{feature.getProperties()[this.props.subtitleAttribute]}</p>
+                        </div>
+                    </div>
+                        <hr />
+                    </div>
+                })}
+
                 {!loading && !this.state.selectMode && <div style={{ textAlign: "center" }} className="col-xs-12 col-sm-12 col-md-6 col-lg-6 col-md-offset-3"><UltimatePaginationBootstrap3
                     totalPages={Math.ceil(this.state.totalFeatures / this.state.perPage)}
                     currentPage={this.state.currentPage}
@@ -294,5 +333,6 @@ FeatureList.propTypes = {
     // map: PropTypes.object.isRequired,
     layer: PropTypes.string.isRequired,
     geoserverUrl: PropTypes.string.isRequired,
-    attribute: PropTypes.string.isRequired
+    subtitleAttribute: PropTypes.string.isRequired,
+    titleAttribute: PropTypes.string.isRequired
 };

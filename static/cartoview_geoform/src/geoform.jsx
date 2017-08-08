@@ -8,26 +8,25 @@ import ReactDOM from 'react-dom'
 import WFSClient from './utils/WFSClient.jsx'
 import ol from 'openlayers'
 import t from 'tcomb-form'
-
 // check if number is int
-const Int = t.refinement(t.Number, (n) => n % 1 == 0)
-const getSRSName = (geojson) => {
+const Int = t.refinement( t.Number, ( n ) => n % 1 == 0 )
+const getSRSName = ( geojson ) => {
     //"EPSG:900913"
-    const srs = geojson.crs.properties.name.split(":").pop()
+    const srs = geojson.crs.properties.name.split( ":" ).pop( )
     return "EPSG:" + srs;
 }
 class AttrsForm extends Component {
-    getValue() {
-        return this.form.getValue();
+    getValue( ) {
+        return this.form.getValue( );
     }
-    render() {
+    render( ) {
         const { attributes } = this.props;
         const schema = {},
             fields = {},
             value = {};
-        attributes.forEach(a => {
-            if (a.included) {
-                fields[a.name] = {
+        attributes.forEach( a => {
+            if ( a.included ) {
+                fields[ a.name ] = {
                     label: a.label,
                     help: a.helpText,
                     type: a.fieldType,
@@ -35,33 +34,33 @@ class AttrsForm extends Component {
                         placeholder: a.placeholder
                     }
                 }
-                value[a.name] = a.defaultValue;
-                if (a.fieldType == "select") {
+                value[ a.name ] = a.defaultValue
+                if ( a.fieldType == "select" ) {
                     const options = {}
-                    a.options.forEach(o => options[o.value] = o
-                        .label);
-                    schema[a.name] = t.enums(options);
-                } else if (a.fieldType == "number") {
-                    fields[a.name].type = 'number'
-                    schema[a.name] = a.dataType == "int" ? Int :
+                    a.options.forEach( o => options[ o.value ] = o
+                        .label );
+                    schema[ a.name ] = t.enums( options );
+                } else if ( a.fieldType == "number" ) {
+                    fields[ a.name ].type = 'number'
+                    schema[ a.name ] = a.dataType == "int" ? Int :
                         t.Number
-                } else if (a.fieldType == "checkbox") {
-                    schema[a.name] = t.Bool
+                } else if ( a.fieldType == "checkbox" ) {
+                    schema[ a.name ] = t.Bool
                 }
                 //default case if data type is string
                 // here field type may be text or textarea
-                else if (a.dataType == "string") {
-                    schema[a.name] = t.String
+                else if ( a.dataType == "string" ) {
+                    schema[ a.name ] = t.String
                 }
-                if (schema[a.name]) {
-                    if (a.required) {
-                        fields[a.name].help += " (Required)"
+                if ( schema[ a.name ] ) {
+                    if ( a.required ) {
+                        fields[ a.name ].help += " (Required)"
                     } else {
-                        schema[a.name] = t.maybe(schema[a.name])
+                        schema[ a.name ] = t.maybe( schema[ a.name ] )
                     }
                 }
             }
-        });
+        } );
         return (
             <div className="panel panel-primary">
                 <div className="panel-heading">Enter Information</div>
@@ -73,10 +72,10 @@ class AttrsForm extends Component {
     }
 }
 class FileForm extends Component {
-    getValue() {
-        return { file: this.input.files[0] };
+    getValue( ) {
+        return { file: this.input.files[ 0 ] };
     }
-    render() {
+    render( ) {
         return (
             <div className="panel panel-primary">
                 <div className="panel-heading">Images</div>
@@ -91,78 +90,78 @@ class FileForm extends Component {
     }
 }
 class GeoForm extends Component {
-    constructor(props) {
-        super(props)
+    constructor( props ) {
+        super( props )
         this.state = {
             currentComponent: "form"
         }
-        this.map = new ol.Map({
+        this.map = new ol.Map( {
             // controls: [new ol.control.Attribution({collapsible: false}), new
             // ol.control.ScaleLine()],
-            layers: [new ol.layer.Tile({
+            layers: [ new ol.layer.Tile( {
                 title: 'OpenStreetMap',
-                source: new ol.source.OSM()
-            })],
-            view: new ol.View({
+                source: new ol.source.OSM( )
+            } ) ],
+            view: new ol.View( {
                 center: [
                     0, 0
                 ],
                 zoom: 3
-            })
-        });
+            } )
+        } );
     }
-    WFS = new WFSClient(this.props.geoserverUrl)
-    onSubmit = (e) => {
-        e.preventDefault()
+    WFS = new WFSClient( this.props.geoserverUrl )
+    onSubmit = ( e ) => {
+        e.preventDefault( )
         const { layer, geometryName, uploadUrl } = this.props;
-        const properties = Object.assign({}, this.form.getValue());
-        console.log(properties);
-        const geometry = Object.assign({
+        const properties = Object.assign( {}, this.form.getValue( ) );
+        console.log( properties );
+        const geometry = Object.assign( {
             name: geometryName,
             srsName: "EPSG:4326"
-        }, this.xyForm.getValue());
-        this.setState({
+        }, this.xyForm.getValue( ) );
+        this.setState( {
             saving: true
-        })
-        this.WFS.insertFeature(layer, properties, geometry).then(res =>
-            res.text()).then((xml) => {
-                console.log(xml);
-                const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(xml, "text/xml");
-                const featureElements = xmlDoc.getElementsByTagNameNS(
-                    'http://www.opengis.net/ogc', 'FeatureId');
-                if (featureElements.length > 0) {
-                    const fid = featureElements[0].getAttribute(
-                        "fid").split(".").pop();
-                    const fileFormValue = this.fileForm.getValue();
-                    console.log(fileFormValue);
-                    const fd = new FormData();
-                    fd.append('file', fileFormValue.file,
-                        fileFormValue.file.name);
-                    fd.append('layer', layer.split(":").pop());
-                    fd.append('fid', fid);
-                    fetch(uploadUrl, {
-                        method: 'POST',
-                        credentials: 'include',
-                        body: fd
-                    }).then(res => res.json()).then(res => {
-                        this.setState({
-                            saving: false
-                        })
-                    });
-                }
-                //ogc:FeatureId
-            })
+        } )
+        this.WFS.insertFeature( layer, properties, geometry ).then( res =>
+            res.text( ) ).then( ( xml ) => {
+            console.log( xml );
+            const parser = new DOMParser( );
+            const xmlDoc = parser.parseFromString( xml, "text/xml" );
+            const featureElements = xmlDoc.getElementsByTagNameNS(
+                'http://www.opengis.net/ogc', 'FeatureId' );
+            if ( featureElements.length > 0 ) {
+                const fid = featureElements[ 0 ].getAttribute(
+                    "fid" ).split( "." ).pop( );
+                const fileFormValue = this.fileForm.getValue( );
+                console.log( fileFormValue );
+                const fd = new FormData( );
+                fd.append( 'file', fileFormValue.file,
+                    fileFormValue.file.name );
+                fd.append( 'layer', layer.split( ":" ).pop( ) );
+                fd.append( 'fid', fid );
+                fetch( uploadUrl, {
+                    method: 'POST',
+                    credentials: 'include',
+                    body: fd
+                } ).then( res => res.json( ) ).then( res => {
+                    this.setState( {
+                        saving: false
+                    } )
+                } );
+            }
+            //ogc:FeatureId
+        } )
     }
-    layerName() {
-        return this.props.layer.split(":").pop()
+    layerName( ) {
+        return this.props.layer.split( ":" ).pop( )
     }
-    getXYForm() {
+    getXYForm( ) {
         const { xyValue } = this.state;
-        const xyFormSchema = t.struct({
+        const xyFormSchema = t.struct( {
             x: t.Number,
             y: t.Number
-        });
+        } );
         const options = {
             fields: {
                 x: {
@@ -180,27 +179,26 @@ class GeoForm extends Component {
             value={xyValue}
             onChange={(xyValue) => this.setState({ xyValue })} />
     }
-    onFeatureMove = (coords) => {
-        const center = ol.proj.transform(coords, 'EPSG:900913',
-            'EPSG:4326')
-        this.setState({
+    onFeatureMove = ( coords ) => {
+        const center = ol.proj.transform( coords, 'EPSG:900913',
+            'EPSG:4326' )
+        this.setState( {
             xyValue: {
-                x: center[0],
-                y: center[1]
+                x: center[ 0 ],
+                y: center[ 1 ]
             }
-        })
+        } )
     }
-    onMapReady = (map) => {
-        this.onFeatureMove(map.getView().getCenter());
+    onMapReady = ( map ) => {
+        this.onFeatureMove( map.getView( ).getCenter( ) );
     }
-    toggleComponent = (component) => {
+    toggleComponent = ( component ) => {
         let { currentComponent } = this.state
-
-        if (currentComponent != component) {
-            this.setState({ currentComponent: component })
+        if ( currentComponent != component ) {
+            this.setState( { currentComponent: component } )
         }
     }
-    render() {
+    render( ) {
         const { formTitle, mapId, attributes } = this.props
         const { xyValue, saving, currentComponent } = this.state;
         return (
@@ -208,7 +206,7 @@ class GeoForm extends Component {
                 {/* <h1>GeoForm<small> {this.layerName().split('_').join(' ')} </small></h1>
         <hr/> */}
                 <ul className="nav nav-pills">
-                    <li onClick={() => this.toggleComponent("form")} role="presentation" className={currentComponent === "form" ? "active" : ""}><a data-toggle="tab" href="#form">Add Form</a></li>
+                    <li onClick={() => this.toggleComponent("form")} role="presentation" className={currentComponent === "form" ? "active" : ""}><a data-toggle="tab" href="#form">Add</a></li>
                     <li onClick={() => this.toggleComponent("map")} role="presentation" className={currentComponent === "map" ? "active" : ""}><a data-toggle="tab" href="#map">Map</a></li>
                     <li onClick={() => this.toggleComponent("featureList")} role="presentation" className={currentComponent === "featureList" ? "active" : ""}><a data-toggle="tab" href="#featureList">List</a></li>
                 </ul>
@@ -216,7 +214,15 @@ class GeoForm extends Component {
                 <div className="tab-content">
                     <div id="form" className="tab-pane fade in active">
                         <div>
-                            <span className="h3"><b>Title: {formTitle || 'Add'}</b></span>
+                            <div style={{ marginBottom: 20 }} className="row">
+                                <div style={{ textAlign: '-webkit-center' }} className="col-xs-4 col-sm-2 col-md-2 vcenter">
+                                    <img style={{ height: 60 }} className="img-responsive img-rounded" src={this.props.logo.base64} />
+
+                                </div>
+                                <div className="col-xs-8 col-sm-9 col-md-9 vcenter">
+                                    <span className="h3"><b>{formTitle || 'Add'}</b></span>
+                                </div>
+                            </div>
                             <AttrsForm key="attrsForm" attributes={attributes} ref={f => this.form = f} />
                             <FileForm ref={f => this.fileForm = f} key="fileform" />
                             <div className="panel panel-primary">
@@ -250,9 +256,9 @@ class GeoForm extends Component {
     }
 }
 global.GeoForm = {
-    show: (el, props) => {
-        var geoform = React.createElement(GeoForm, props);
-        ReactDOM.render(geoform, document.getElementById(el));
+    show: ( el, props ) => {
+        var geoform = React.createElement( GeoForm, props );
+        ReactDOM.render( geoform, document.getElementById( el ) );
     }
 };
 export default GeoForm;

@@ -39,7 +39,11 @@ module.exports = {
 		}, {
 			test: /\.css$/,
 			loader: "style-loader!css-loader"
-		}],
+		}, {
+			test: /\.(png|jpg|gif)$/,
+			loader: 'file-loader'
+		}
+	],
 		noParse: [/dist\/ol\.js/, /dist\/jspdf.debug\.js/, /dist\/js\/tether\.js/]
 	}
 };

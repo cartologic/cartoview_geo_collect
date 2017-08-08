@@ -35,10 +35,20 @@ body {
     height: 400px
 }
 
+.img-logo {
+    background-size: cover;
+}
+
 @-webkit-keyframes spin {
     100% {
         -webkit-transform: rotate(360deg);
     }
+}
+
+#feature-item .img-responsive {
+    display: block;
+    width: auto;
+    max-height: 100%;
 }
 
 @keyframes spin {
@@ -46,4 +56,9 @@ body {
         -webkit-transform: rotate(360deg);
         transform: rotate(360deg);
     }
+}
+.vcenter {
+    display: inline-block;
+    vertical-align: middle;
+    float: none;
 }
