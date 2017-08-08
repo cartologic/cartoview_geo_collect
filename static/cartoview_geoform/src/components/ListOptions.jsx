@@ -18,7 +18,7 @@ export default class ListOptions extends Component {
             pagination: this.props.config ? this.props.config.pagination : null,
             attributes: [ ],
             searchOptions: [ ],
-			filters: [ ],
+			filters: this.props.config ? this.props.config.filters:[ ],
 			messages:null
         }
     }

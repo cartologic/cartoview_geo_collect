@@ -19,7 +19,6 @@ const Options = t.struct({
 export default class FormFields extends Component {
     constructor(props) {
         super(props)
-        console.log(this.props.config ? this.props.config.attributes : [])
         this.state = {
             attributes: this.props.config ? this.props.config.attributes : [],
             geometryName: undefined,
@@ -212,7 +211,7 @@ export default class FormFields extends Component {
                             <div className="input-group">
                                 <span className="input-group-addon">
                                     <input
-                                        defaultChecked
+                                        defaultChecked={attribute.included}
                                         onChange={() => this.includeChanged(attribute.id)}
                                         ref={"attr_check_" + attribute.id}
                                         type="checkbox" />
