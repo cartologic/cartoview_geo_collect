@@ -8,12 +8,12 @@ import ol from 'openlayers'
 
 class MapViewer extends React.Component {
     constructor(props) {
-        super(props);
-        this.loaded = false;
+        super(props)
+        this.loaded = false
         this.feature = new ol.Feature({
             geometry: new ol.geom.Point([0, 0]),
             geometryName: 'the_geom'
-        });
+        })
         const featureStyle = new ol.style.Style({
             image: new ol.style.Icon({
                 anchor: [
@@ -36,56 +36,56 @@ class MapViewer extends React.Component {
                 offsetY: -20,
                 font: '18px serif'
             })
-        });
+        })
         this.vectorLayer = new ol.layer.Vector({
             source: new ol.source.Vector({
                 features: [this.feature]
             }),
             style: featureStyle
-        });
+        })
         this.modifyInteraction = new ol.interaction.Modify({
             features: new ol.Collection([this.feature]),
             pixelTolerance: 32
-        });
+        })
         this.modifyInteraction.on('modifyend', this.onFeatureMove)
         this.map = this.props.map
     }
     onFeatureMove = (event) => {
-        this.props.onFeatureMove(this.feature.getGeometry().getCoordinates());
+        this.props.onFeatureMove(this.feature.getGeometry().getCoordinates())
     }
     update(mapId) {
         if (mapId) {
-            var url = getMapConfigUrl(mapId);
+            var url = getMapConfigUrl(mapId)
             fetch(url, {
                 method: "GET",
                 credentials: 'include'
             }).then((response) => {
                 if (response.status == 200) {
-                    return response.json();
+                    return response.json()
                 }
             }).then((config) => {
                 if (config) {
                     MapConfigService.load(
                         MapConfigTransformService.transform(
-                            config), this.map);
+                            config), this.map)
                     this.feature.setGeometry(new ol.geom.Point(
                         this.map.getView().getCenter()
-                    ));
-                    this.map.addLayer(this.vectorLayer);
-                    this.map.addInteraction(this.modifyInteraction);
-                    this.modifyInteraction.setActive(true);
+                    ))
+                    this.map.addLayer(this.vectorLayer)
+                    this.map.addInteraction(this.modifyInteraction)
+                    this.modifyInteraction.setActive(true)
                     if (typeof this.props.onMapReady ==
                         'function') this.props.onMapReady(
-                            this.map);
+                            this.map)
                 }
-            });
+            })
         }
     }
     componentDidMount() {
 
-        this.map.setTarget(ReactDOM.findDOMNode(this.refs.map));
-        this.update(this.props.mapId);
-        this.map.updateSize();
+        this.map.setTarget(ReactDOM.findDOMNode(this.refs.map))
+        this.update(this.props.mapId)
+        this.map.updateSize()
 
     }
     componentWillReceiveProps(nextProps) {
@@ -93,8 +93,8 @@ class MapViewer extends React.Component {
                 EnableGeolocation,
             isGeolocationAvailable,
             coords
-        } = nextProps;
-        if (EnableGeolocation && isGeolocationAvailable && coords && coords !== this.props.coords) {
+        } = nextProps
+        if (EnableGeolocation && isGeolocationAvailable && coords && coords !== this.props.coords && !this.props.moving) {
             this.props.changeXY({ x: coords.longitude, y: coords.latitude })
         }
     }
@@ -105,22 +105,22 @@ class MapViewer extends React.Component {
             EnableGeolocation,
             isGeolocationAvailable,
             coords
-        } = this.props;
-        if (EnableGeolocation && isGeolocationAvailable && coords) {
+        } = this.props
+        if (EnableGeolocation && isGeolocationAvailable && coords && !this.props.moving) {
 
             const coordsTransformed = ol.proj.transform([
                 parseFloat(coords.longitude),
                 parseFloat(coords.latitude)
-            ], 'EPSG:4326', this.map.getView().getProjection());
-            this.map.getView().setCenter(coordsTransformed);
+            ], 'EPSG:4326', this.map.getView().getProjection())
+            this.map.getView().setCenter(coordsTransformed)
             this.feature.setGeometry(new ol.geom.Point(
                 coordsTransformed))
         } else if (xy) {
             const coordsTransformed = ol.proj.transform([
                 parseFloat(xy.x),
                 parseFloat(xy.y)
-            ], 'EPSG:4326', 'EPSG:900913');
-            this.map.getView().setCenter(coordsTransformed);
+            ], 'EPSG:4326', 'EPSG:900913')
+            this.map.getView().setCenter(coordsTransformed)
             this.feature.setGeometry(new ol.geom.Point(
                 coordsTransformed))
         }
@@ -131,7 +131,7 @@ class MapViewer extends React.Component {
                     {this.props.children}
                 </div>
             </div>
-        );
+        )
     }
 }
 MapViewer.propTypes = { ...MapViewer.propTypes, ...geoPropTypes }
@@ -142,4 +142,4 @@ export default geolocated({
         timeout: Infinity,
     },
     userDecisionTimeout: null,
-})(MapViewer);
+})(MapViewer)
