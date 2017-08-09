@@ -11,7 +11,8 @@ const mapConfig = t.struct( {
     showZoombar: t.Boolean,
     showLayerSwitcher: t.Boolean,
     showBaseMapSwitcher: t.Boolean,
-    showLegend: t.Boolean
+    showLegend: t.Boolean,
+    EnableGeolocation: t.Boolean
 } );
 const options = {
     fields: {
@@ -26,6 +27,9 @@ const options = {
         },
         showLegend: {
             label: "Legend"
+        },
+        EnableGeolocation: {
+            label: "GeoLocation"
         }
     }
 };
@@ -40,7 +44,8 @@ export default class NavigationTools extends Component {
                     .showLayerSwitcher : true,
                 showBaseMapSwitcher: this.props.config ? this.props.config
                     .showBaseMapSwitcher : true,
-                showLegend: this.props.config ? this.props.config.showLegend : true
+                showLegend: this.props.config ? this.props.config.showLegend : true,
+                EnableGeolocation: this.props.config ? this.props.config.EnableGeolocation : true
             }
         }
     }
@@ -56,7 +61,8 @@ export default class NavigationTools extends Component {
                 showZoombar: basicConfig.showZoombar,
                 showLayerSwitcher: basicConfig.showLayerSwitcher,
                 showBaseMapSwitcher: basicConfig.showBaseMapSwitcher,
-                showLegend: basicConfig.showLegend
+				showLegend: basicConfig.showLegend,
+				EnableGeolocation:basicConfig.EnableGeolocation
             }
             this.props.onComplete( properConfig )
         }
