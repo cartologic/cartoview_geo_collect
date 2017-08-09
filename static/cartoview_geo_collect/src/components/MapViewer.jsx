@@ -113,7 +113,7 @@ class MapViewer extends React.Component {
         }
         return (
             <div>
-                {EnableGeolocation && isGeolocationAvailable && coords && <h4>Accuracy: <small>{coords.accuracy} Meter</small></h4>}
+                {EnableGeolocation && isGeolocationAvailable && coords && <h4><i className="fa fa-location-arrow" aria-hidden="true"></i> Accuracy: <small>{coords.accuracy} Meter</small></h4>}
                 <div ref="map" style={{ border: "2px solid lightgray", borderRadius: "8px" }} className={className + ' map-ct'}>
                     {this.props.children}
                 </div>
