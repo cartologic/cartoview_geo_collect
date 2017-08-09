@@ -1,0 +1,54 @@
+{% extends "app_manager/app_install_base.html" %}
+{% load viewer_helper_tags %}
+{% load bootstrap_tags staticfiles %}
+{% load i18n %}
+{% load static %}
+{% block title %} {{ block.super }} - {% trans "Geoform" %}- {{instance.title}} {% endblock %}
+{% block head %}
+    {% include "geonode/ext_header.html" %}
+    {% include "geonode/app_header.html" %}
+    {{ block.super }}
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ol3/4.2.0/ol.css" />
+      <link rel="shortcut icon" type="image/png" href="{{ STATIC_URL }}cartoview/img/icon.png" />
+    <style>
+        html {
+            height: 100%;
+            margin: 0px;
+        }
+    </style>
+{% endblock %}
+{% block body %}
+    <div id="page-wrapper">
+        <div class="container-fluid">
+            <div class="row" id="main-ct"></div>
+        </div>
+    </div>
+
+{% endblock %}
+{% block extra_script %}
+
+    <script src="{{ STATIC_URL }}cartoview_geo_collect/dist/geoCollect.bundle.js?v={{v}}"></script>
+    <script type="text/javascript">
+      var URLS = {
+        geoserver: "{{ GEOSERVER_BASE_URL }}",
+        //{% if PROXY_URL %}
+        proxy: "{{ PROXY_URL }}",
+        //{% endif %}
+        static: "{{ STATIC_URL }}",
+        media: "{{ MEDIA_URL }}",
+        rest: "{% url 'app_manager_base_url' %}rest/app_manager/",
+        geonodeRest: "{% url 'api_api_top_level' 'api' %}"
+      };
+      function getMapConfigUrl(id){
+        return "/maps/" + id + "/data"
+      }
+
+      const props = {{ instance.config | safe }};
+      props.formTitle="{{instance.title}}"
+      props.mapId =  {{ instance.map.id }};
+      props.geoserverUrl = URLS.geoserver
+      props.uploadUrl = "{% url 'cartoview_geo_collect.attachment' %}"
+      GeoForm.show('main-ct', props);
+    </script>
+{% endblock %}
+
