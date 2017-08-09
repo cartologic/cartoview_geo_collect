@@ -1,49 +1,63 @@
 import React, { Component } from 'react'
 
+import Img from 'react-image'
+import {
+  Link
+} from 'react-router-dom'
 import PropTypes from 'prop-types'
-import ReactDOM from 'react-dom'
+import Spinner from "react-spinkit"
+import noImage from '../img/no-img.png'
 
-export default class QuestionModal extends Component {
+export default class InfoPage extends Component {
     constructor(props) {
         super(props)
 
     }
     componentDidMount() {
-        $(ReactDOM.findDOMNode(this)).modal('show')
-        $(ReactDOM.findDOMNode(this)).on('hidden.bs.modal', this.props
-            .handleHideModal)
-    }
-    save = () => {
-        this.props.onYes()
-        $(ReactDOM.findDOMNode(this)).modal('hide')
+        setTimeout(()=>{ $('#info-title').addClass('animated fadOutUpBig')
+        $('#info-description').addClass('animated fadOutUpBig') }, 3000);
+        
     }
     render() {
+        let {
+            title,
+            description,
+        } = this.props
         return (
-            <div className="modal fade" tabIndex="-1" role="dialog">
-                <div className="modal-dialog" role="document">
-                    <div className="modal-content">
-                        <div className="modal-header">
-                            <button type="button" className="close" data-dismiss="modal" aria-label="Close">
-                                <span aria-hidden="true">&times;</span>
-                            </button>
-                            <h4 className="modal-title">Question??</h4>
-                        </div>
-                        <div className="modal-body">
-                            <div className="alert alert-warning">
-                                <strong>Warning!</strong> You are about to save data on server! Are you Sure?
-                            </div>
-                        </div>
-                        <div className="modal-footer">
-                            <button type="button" className="btn btn-default" data-dismiss="modal">No</button>
-                            <button type="button" onClick={this.save} className="btn btn-primary">Yes</button>
-                        </div>
+            <div>
+                <div className="row">
+                    <div className="col-xs-12 col-sm-12 col-md-9">
+                        <h3 id="info-title">{title}</h3>
+                        <hr />
+                        <p id="info-description" >{description}</p>
+                    </div>
+                    <div className="col-xs-12 col-sm-12 col-md-3">
+                        <a href="javascript:;" className="thumbnail">
+                            <Img
+                                src={[
+                                    "/static/cartoview_geo_collect/logo.png",
+                                    noImage
+                                ]}
+                                loader={<Spinner className="loading-center" name="line-scale-party" color="steelblue" />}
+                                className="img-responsive img-thumbnail"
+                            />
+                        </a>
+                    </div>
+
+                </div>
+                <hr/>
+                <div className="row">
+                    <div className="col-xs-12 col-sm-12 col-md-6 col-lg-6 col-md-offset-3 col-lg-offset-3">
+                        <div className="col-xs-12 col-sm-12 col-md-6 col-lg-6"><a href="/apps/appinstances/?app__title=GeoCollect" className="btn btn-primary">Home</a></div>
+                        <div className="col-xs-12 col-sm-12 col-md-6 col-lg-6"><Link className="btn btn-success" to="/form">Add New</Link></div>
+                       
                     </div>
                 </div>
             </div>
         )
     }
 }
-QuestionModal.propTypes = {
-    handleHideModal: PropTypes.func.isRequired,
-    onYes: PropTypes.func.isRequired,
+InfoPage.propTypes = {
+    title: PropTypes.string.isRequired,
+    description: PropTypes.string.isRequired
 }

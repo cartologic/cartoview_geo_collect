@@ -86,6 +86,7 @@ class MapViewer extends React.Component {
         this.map.setTarget(ReactDOM.findDOMNode(this.refs.map))
         this.update(this.props.mapId)
         this.map.updateSize()
+        setTimeout(()=>{this.map.updateSize()},3000)
 
     }
     componentWillReceiveProps(nextProps) {

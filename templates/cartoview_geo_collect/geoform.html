@@ -10,6 +10,8 @@
     {{ block.super }}
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ol3/4.2.0/ol.css" />
       <link rel="shortcut icon" type="image/png" href="{{ STATIC_URL }}cartoview/img/icon.png" />
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
+
     <style>
         html {
             height: 100%;
@@ -44,7 +46,10 @@
       }
 
       const props = {{ instance.config | safe }};
+      
       props.formTitle="{{instance.title}}"
+      props.appName="GeoCollect"
+      props.description="collect XY Location and associate Attributes and Images. Work Field Crews Can utilize this Application To Collect Information About Assets .Users can also use this Application To report Issues or Collect New Features . once the data is Saved it Will Be directly Saved To the server,to setup your app author a new shapefile then upload it to the server then follow the instructions,users will use the app to save data to this layer"
       props.mapId =  {{ instance.map.id }};
       props.geoserverUrl = URLS.geoserver
       props.uploadUrl = "{% url 'cartoview_geo_collect.attachment' %}"
