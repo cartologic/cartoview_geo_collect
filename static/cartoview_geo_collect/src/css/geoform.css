@@ -62,3 +62,11 @@ body {
     vertical-align: middle;
     float: none;
 }
+.collector-title{
+    margin-bottom: 20px;
+    margin-left: 5px;
+    border-left: 6px solid #2c689c;
+    background-color: white;
+    padding-bottom: 10px;
+    padding-top: 10px;
+}

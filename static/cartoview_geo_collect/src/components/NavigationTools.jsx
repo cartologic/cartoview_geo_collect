@@ -100,7 +100,7 @@ export default class NavigationTools extends Component {
 							className={this.state.success === true
 							? "btn btn-primary btn-sm pull-right"
 							: "btn btn-primary btn-sm pull-right disabled"}
-							href={`/apps/cartoview_geoform/${ this.props.id }/view/`}>
+							href={`/apps/cartoview_geo_collect/${ this.props.id }/view/`}>
 							View
 						</a>
 

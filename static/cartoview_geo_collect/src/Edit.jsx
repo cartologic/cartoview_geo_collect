@@ -10,6 +10,7 @@ import ListOptions from "./components/ListOptions"
 import NavigationTools from './components/NavigationTools.jsx'
 import Navigator from './components/Navigator.jsx'
 import ResourceSelector from './components/ResourceSelector.jsx'
+
 export default class Edit extends Component {
     constructor( props ) {
         super( props )
@@ -78,30 +79,6 @@ export default class Edit extends Component {
                     }
                 }
             }, {
-                label: "Feature List Customization",
-                component: ListOptions,
-                props: {
-                    map: this.state.selectedResource,
-                    setAttributes: ( attributes ) => {
-                        this.setState( { attributes: attributes } )
-                    },
-                    config: this.props.config.instance ? this.props.config
-                        .instance.config : null,
-                    urls: this.props.config.urls,
-                    onComplete: ( listConfig ) => {
-                        let { step } = this.state
-                        let currentConfig = this.state.config
-                        let newConfig = Object.assign(
-                            currentConfig, listConfig )
-                        this.setState( {
-                            config: currentConfig
-                        }, this.goToStep( ++step ) )
-                    },
-                    onPrevious: ( ) => {
-                        this.onPrevious( )
-                    }
-                }
-            }, {
                 label: "Form Customization",
                 component: FormFields,
                 props: {
@@ -113,7 +90,7 @@ export default class Edit extends Component {
                     onComplete: ( config ) => {
                         let { step } = this.state
                         let currentConfig = this.state.config
-                        Object.assign( currentConfig.config,
+                        Object.assign( currentConfig,
                             config )
                         this.setState( {
                             config: currentConfig
