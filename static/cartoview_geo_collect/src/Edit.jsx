@@ -6,7 +6,7 @@ import EditService from './services/editService.jsx'
 import FormFields from './components/FormFields'
 import General from './components/General.jsx'
 import ImageUploader from "./components/ImageUploader.jsx"
-import ListOptions from "./components/ListOptions"
+import LayerSelector from "./components/LayerSelector.jsx"
 import NavigationTools from './components/NavigationTools.jsx'
 import Navigator from './components/Navigator.jsx'
 import ResourceSelector from './components/ResourceSelector.jsx'
@@ -78,7 +78,31 @@ export default class Edit extends Component {
                         this.onPrevious( )
                     }
                 }
-            }, {
+            },{
+                 label: "Select Layer",
+                 component: LayerSelector,
+                 props: {
+                     map: this.state.selectedResource,
+                     setAttributes: ( attributes ) => {
+                         this.setState( { attributes: attributes } )
+                     },
+                     config: this.props.config.instance ? this.props.config
+                         .instance.config : null,
+                     urls: this.props.config.urls,
+                     onComplete: ( listConfig ) => {
+                         let { step } = this.state
+                         let currentConfig = this.state.config
+                         let newConfig = Object.assign(
+                             currentConfig, listConfig )
+                         this.setState( {
+                             config: currentConfig
+                         }, this.goToStep( ++step ) )
+                     },
+                     onPrevious: ( ) => {
+                         this.onPrevious( )
+                     }
+                 }
+             }, {
                 label: "Form Customization",
                 component: FormFields,
                 props: {
@@ -90,7 +114,7 @@ export default class Edit extends Component {
                     onComplete: ( config ) => {
                         let { step } = this.state
                         let currentConfig = this.state.config
-                        Object.assign( currentConfig,
+                        Object.assign( currentConfig.config,
                             config )
                         this.setState( {
                             config: currentConfig
