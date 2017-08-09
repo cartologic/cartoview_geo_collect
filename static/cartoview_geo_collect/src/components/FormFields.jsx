@@ -183,7 +183,7 @@ export default class FormFields extends Component {
                             }}
                             className="btn btn-primary btn-sm pull-right"
                             onClick={() => {
-                                this.props.onComplete({config:{ attributes: this.state.attributes, geometryName: this.state.geometryName }})
+                                this.props.onComplete({attributes: this.state.attributes, geometryName: this.state.geometryName })
                             }}>{"next "}
                             <i className="fa fa-arrow-right"></i>
                         </button>

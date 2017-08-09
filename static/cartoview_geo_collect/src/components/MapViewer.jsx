@@ -94,7 +94,6 @@ class MapViewer extends React.Component {
                 isGeolocationAvailable,
                 coords
         } = this.props;
-        console.log( this.props )
         if ( EnableGeolocation && isGeolocationAvailable && coords ) {
             const coordsTransformed = ol.proj.transform( [
                 parseFloat( coords.longitude ),
