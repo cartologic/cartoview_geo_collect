@@ -123,6 +123,7 @@ class GeoCollect extends Component {
         this.setState({
             saving: true
         })
+        console.log(geometry)
         this.WFS.insertFeature(layer, properties, geometry).then(res =>
             res.text()).then((xml) => {
                 console.log(xml);
@@ -198,6 +199,9 @@ class GeoCollect extends Component {
             this.setState({ currentComponent: component })
         }
     }
+    changeXY=(xy)=>{
+        this.setState({xyValue:xy})
+    }
     render() {
         const { formTitle, mapId, attributes } = this.props
         const { xyValue, saving, currentComponent } = this.state;
@@ -222,7 +226,7 @@ class GeoCollect extends Component {
                         </div>
                     </div>
                     <div>
-                        <MapViewer map={this.map} mapId={mapId} xy={xyValue} onMapReady={this.onMapReady} onFeatureMove={this.onFeatureMove} EnableGeolocation={this.props.EnableGeolocation} />
+                        <MapViewer changeXY={this.changeXY} map={this.map} mapId={mapId} xy={xyValue} onMapReady={this.onMapReady} onFeatureMove={this.onFeatureMove} EnableGeolocation={this.props.EnableGeolocation} />
                     </div>
                     <hr />
                     <div className="form-group" style={{ marginTop: "2%" }}>
