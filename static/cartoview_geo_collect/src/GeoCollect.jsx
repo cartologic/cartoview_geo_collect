@@ -222,7 +222,7 @@ class GeoCollect extends Component {
                         </div>
                     </div>
                     <div>
-                        <MapViewer map={this.map} mapId={mapId} xy={xyValue} onMapReady={this.onMapReady} onFeatureMove={this.onFeatureMove} />
+                        <MapViewer map={this.map} mapId={mapId} xy={xyValue} onMapReady={this.onMapReady} onFeatureMove={this.onFeatureMove} EnableGeolocation={this.props.EnableGeolocation} />
                     </div>
                     <hr />
                     <div className="form-group" style={{ marginTop: "2%" }}>
