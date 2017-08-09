@@ -6,8 +6,8 @@ export default class EditService {
 	}
 	save( instanceConfig, id ) {
 		const url = id
-			? this.baseUrl + "apps/cartoview_geoform/" + id + "/edit"
-			: this.baseUrl + "apps/cartoview_geoform/new"
+			? this.baseUrl + "apps/cartoview_geo_collect/" + id + "/edit"
+			: this.baseUrl + "apps/cartoview_geo_collect/new"
 		return fetch(hasTrailingSlash( url )
 			? url
 			: url + "/", {
