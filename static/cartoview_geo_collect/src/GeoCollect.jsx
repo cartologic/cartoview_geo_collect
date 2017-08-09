@@ -1,29 +1,44 @@
 import './css/geoform.css'
 
 import React, { Component } from 'react'
+import { Route, Router, hashHistory } from 'react-router'
 
+import InfoPage from './components/InfoPage'
 import MapViewer from './components/MapViewer.jsx'
+import PropTypes from 'prop-types'
+import QuestionModal from './components/QuestionModal'
 import ReactDOM from 'react-dom'
 import WFSClient from './utils/WFSClient.jsx'
+import history from './components/history'
 import ol from 'openlayers'
 import t from 'tcomb-form'
 
+var modalStyle = {
+    transform: 'rotate(45deg) translateX(-50%)',
+};
+var backdropStyle = {
+    backgroundColor: 'red'
+};
+var contentStyle = {
+    backgroundColor: 'blue',
+    height: '100%'
+};
 // check if number is int
 const Int = t.refinement(t.Number, (n) => n % 1 == 0)
 const getSRSName = (geojson) => {
     //"EPSG:900913"
     const srs = geojson.crs.properties.name.split(":").pop()
-    return "EPSG:" + srs;
+    return "EPSG:" + srs
 }
 class AttrsForm extends Component {
     getValue() {
-        return this.form.getValue();
+        return this.form.getValue()
     }
     render() {
-        const { attributes } = this.props;
+        const { attributes } = this.props
         const schema = {},
             fields = {},
-            value = {};
+            value = {}
         attributes.forEach(a => {
             if (a.included) {
                 fields[a.name] = {
@@ -38,8 +53,8 @@ class AttrsForm extends Component {
                 if (a.fieldType == "select") {
                     const options = {}
                     a.options.forEach(o => options[o.value] = o
-                        .label);
-                    schema[a.name] = t.enums(options);
+                        .label)
+                    schema[a.name] = t.enums(options)
                 } else if (a.fieldType == "number") {
                     fields[a.name].type = 'number'
                     schema[a.name] = a.dataType == "int" ? Int :
@@ -60,7 +75,7 @@ class AttrsForm extends Component {
                     }
                 }
             }
-        });
+        })
         return (
             <div className="panel panel-primary">
                 <div className="panel-heading">Enter Information</div>
@@ -73,14 +88,18 @@ class AttrsForm extends Component {
 }
 class FileForm extends Component {
     getValue() {
-        return { file: this.input.files[0] };
+        return { file: this.input.files[0] }
     }
     render() {
+        let { message } = this.props
         return (
             <div className="panel panel-primary">
                 <div className="panel-heading">Images</div>
                 <div className="panel-body">
                     <div className="form-group">
+                        {message && <div className="alert alert-danger">
+                            <strong>Error!</strong> {message}
+                        </div>}
                         <label>Image</label>
                         <input type="file" ref={i => this.input = i} />
                     </div>
@@ -93,11 +112,12 @@ class GeoCollect extends Component {
     constructor(props) {
         super(props)
         this.state = {
-            currentComponent: "form"
+            currentComponent: "infoPage",
+            showModal: false,
+            proceed: false,
+            moving: false
         }
         this.map = new ol.Map({
-            // controls: [new ol.control.Attribution({collapsible: false}), new
-            // ol.control.ScaleLine()],
             layers: [new ol.layer.Tile({
                 title: 'OpenStreetMap',
                 source: new ol.source.OSM()
@@ -108,60 +128,68 @@ class GeoCollect extends Component {
                 ],
                 zoom: 3
             })
-        });
+        })
     }
     WFS = new WFSClient(this.props.geoserverUrl)
     onSubmit = (e) => {
         e.preventDefault()
-        const { layer, geometryName, uploadUrl } = this.props;
-        const properties = Object.assign({}, this.form.getValue());
-        console.log(properties);
+        typeof (this.fileForm.getValue().file) === "undefined" ? this.setState({ message: "Please select Image" }) :
+            this.setState({ message: null })
+        if (this.form.getValue() && this.xyForm.getValue() && typeof (
+            this.fileForm.getValue().file) !== "undefined") {
+            this.showModal()
+        }
+    }
+    saveAll = () => {
+        const { layer, geometryName, uploadUrl } = this.props
+        const properties = Object.assign({}, this.form.getValue())
+        // console.log( properties )
         const geometry = Object.assign({
             name: geometryName,
             srsName: "EPSG:4326"
-        }, this.xyForm.getValue());
+        }, this.xyForm.getValue())
         this.setState({
             saving: true
         })
         this.WFS.insertFeature(layer, properties, geometry).then(res =>
             res.text()).then((xml) => {
-                console.log(xml);
-                const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(xml, "text/xml");
+                // console.log( xml )
+                const parser = new DOMParser()
+                const xmlDoc = parser.parseFromString(xml, "text/xml")
                 const featureElements = xmlDoc.getElementsByTagNameNS(
-                    'http://www.opengis.net/ogc', 'FeatureId');
+                    'http://www.opengis.net/ogc', 'FeatureId')
                 if (featureElements.length > 0) {
                     const fid = featureElements[0].getAttribute(
-                        "fid").split(".").pop();
-                    const fileFormValue = this.fileForm.getValue();
-                    console.log(fileFormValue);
-                    const fd = new FormData();
+                        "fid").split(".").pop()
+                    const fileFormValue = this.fileForm.getValue()
+                    console.log(fileFormValue)
+                    const fd = new FormData()
                     fd.append('file', fileFormValue.file,
-                        fileFormValue.file.name);
-                    fd.append('layer', layer.split(":").pop());
-                    fd.append('fid', fid);
+                        fileFormValue.file.name)
+                    fd.append('layer', layer.split(":").pop())
+                    fd.append('fid', fid)
                     fetch(uploadUrl, {
                         method: 'POST',
                         credentials: 'include',
                         body: fd
                     }).then(res => res.json()).then(res => {
-                        this.setState({
-                            saving: false
-                        })
-                    });
+                        history.push('/')
+                    })
                 }
                 //ogc:FeatureId
             })
+
+       
     }
     layerName() {
         return this.props.layer.split(":").pop()
     }
     getXYForm() {
-        const { xyValue } = this.state;
+        const { xyValue } = this.state
         const xyFormSchema = t.struct({
             x: t.Number,
             y: t.Number
-        });
+        })
         const options = {
             fields: {
                 x: {
@@ -186,24 +214,35 @@ class GeoCollect extends Component {
             xyValue: {
                 x: center[0],
                 y: center[1]
-            }
+            },
+            moving: true
         })
     }
-    onMapReady = (map) => {
-        this.onFeatureMove(map.getView().getCenter());
+    showModal = () => {
+        this.setState({ showModal: !this.state.showModal })
     }
-    toggleComponent = (component) => {
-        let { currentComponent } = this.state
-        if (currentComponent != component) {
-            this.setState({ currentComponent: component })
+    onMapReady = (map) => {
+        if (!this.props.EnableGeolocation) {
+            this.onFeatureMove(map.getView().getCenter())
         }
     }
+    changeXY = (xy) => {
+        this.setState({ xyValue: xy })
+    }
+    onYes = () => {
+        this.saveAll()
+    }
+    toggleComponent = (component) => {
+        console.log(component)
+        this.setState({ currentComponent: component })
+    }
     render() {
-        const { formTitle, mapId, attributes } = this.props
-        const { xyValue, saving, currentComponent } = this.state;
+        const { formTitle, mapId, attributes, appName, description } = this.props
+        const { xyValue, saving, currentComponent } = this.state
         return (
             <div className="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                 <div>
+                    {this.state.showModal && <QuestionModal handleHideModal={this.showModal} onYes={this.onYes} />}
                     <div className="row collector-title">
                         <div style={{ textAlign: '-webkit-center' }} className="col-xs-4 col-sm-2 col-md-2 vcenter">
                             <img style={{ height: 60 }} className="img-responsive img-rounded" src={this.props.logo.base64} />
@@ -214,7 +253,7 @@ class GeoCollect extends Component {
                         </div>
                     </div>
                     <AttrsForm key="attrsForm" attributes={attributes} ref={f => this.form = f} />
-                    <FileForm ref={f => this.fileForm = f} key="fileform" />
+                    <FileForm message={this.state.message} ref={f => this.fileForm = f} key="fileform" />
                     <div className="panel panel-primary">
                         <div className="panel-heading">Select Location</div>
                         <div className="panel-body">
@@ -222,7 +261,7 @@ class GeoCollect extends Component {
                         </div>
                     </div>
                     <div>
-                        <MapViewer map={this.map} mapId={mapId} xy={xyValue} onMapReady={this.onMapReady} onFeatureMove={this.onFeatureMove} EnableGeolocation={this.props.EnableGeolocation} />
+                        <MapViewer moving={this.state.moving} changeXY={this.changeXY} map={this.map} mapId={mapId} xy={xyValue} onMapReady={this.onMapReady} onFeatureMove={this.onFeatureMove} EnableGeolocation={this.props.EnableGeolocation} />
                     </div>
                     <hr />
                     <div className="form-group" style={{ marginTop: "2%" }}>
@@ -238,8 +277,13 @@ class GeoCollect extends Component {
 }
 global.GeoCollect = {
     show: (el, props) => {
-        var geoCollect = React.createElement(GeoCollect, props);
-        ReactDOM.render(geoCollect, document.getElementById(el));
+        var geoCollect = React.createElement(GeoCollect, props)
+        ReactDOM.render(<Router history={history}>
+            <div>
+                <Route exact path="/" render={() => <InfoPage description={props.description} title={props.appName} />} />
+                <Route path="/form" render={() => <GeoCollect {...props} />} />
+            </div>
+        </Router>, document.getElementById(el))
     }
-};
+}
 export default GeoCollect
