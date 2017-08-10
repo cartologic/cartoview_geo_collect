@@ -8,9 +8,14 @@ from django.contrib.auth.decorators import login_required
 from django.shortcuts import HttpResponse, render
 from django.views.decorators.csrf import csrf_exempt
 from geonode.maps.views import _PERMISSION_MSG_VIEW
-
+from django.core.files.base import ContentFile
 from . import APP_NAME, __version__
-
+from PIL import Image
+from base64 import b64decode, b64encode
+from PIL import Image
+import tempfile
+import shutil
+import os
 VIEW_MAP_TPL = "%s/geoform.html" % APP_NAME
 
 
@@ -22,13 +27,33 @@ def collect_data(request, instance_id):
                     context=context)
 
 
+def generate_thumbnails(base64_image, size=(64, 64)):
+    format, image = base64_image.split(';base64,')
+    image = b64decode(image)
+    dirpath = tempfile.mkdtemp()
+    original_path = os.path.join(dirpath, 'original.png')
+    thumbnail_path = os.path.join(dirpath, 'thumbnail.png')
+    with open(original_path, 'wb') as f:
+        f.write(image)
+    im = Image.open(original_path)
+    im.thumbnail(size)
+    im.save(thumbnail_path, "PNG")
+    with open(thumbnail_path, "rb") as image_file:
+        encoded_image = b64encode(image_file.read())
+    shutil.rmtree(dirpath)
+    return format + ';base64,' + encoded_image
+
+
 def save(request, instance_id=None, app_name=APP_NAME):
     res_json = dict(success=False)
     data = json.loads(request.body)
-    print data
+    config = data.get('config', None)
+    base64_image = config.get(
+        'logo', None).get('base64', None)
+    encoded_image = generate_thumbnails(base64_image)
+    config['logo']['base64'] = encoded_image
     map_id = data.get('map', None)
     title = data.get('title', "")
-    config = data.get('config', None)
     access = data.get('access', None)
     config.update(access=access)
     config = json.dumps(data.get('config', None))
@@ -134,3 +159,17 @@ def attachment(request):
                          feature=request.POST["fid"])
     res["success"] = True
     return HttpResponse(json.dumps(res), content_type="text/json")
+
+
+class MultiPartResource(object):
+    def deserialize(self, request, data, format=None):
+        if not format:
+            format = request.Meta.get('CONTENT_TYPE', 'application/json')
+        if format == 'application/x-www-form-urlencoded':
+            return request.POST
+        if format.startswith('multipart'):
+            data = request.POST.copy()
+            data.update(request.FILES)
+            return data
+        return super(MultiPartResource, self).deserialize(request, data,
+                                                          format)
