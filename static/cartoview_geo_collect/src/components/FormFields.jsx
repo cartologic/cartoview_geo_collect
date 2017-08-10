@@ -12,83 +12,82 @@ const initialTypeMapping = {
     boolean: "checkbox",
     datetime: "datetime"
 }
-const Options = t.struct({
+const Options = t.struct( {
     label: t.String,
     value: t.String
-})
+} )
 export default class FormFields extends Component {
-    constructor(props) {
-        super(props)
+    constructor( props ) {
+        super( props )
         this.state = {
-            attributes: this.props.config ? this.props.config.attributes : [],
+            attributes: this.props.config && this.props.currentConfig.layer === this.props.config.layer ? this.props.config.attributes : [ ],
             geometryName: undefined,
             allAttributes: this.props.attributes,
             showModal: false,
             attribute: null,
-            fieldList: [],
+            loading: false,
+            fieldList: [ ],
             fieldConfig: null,
             defaultValue: null,
             currentId: null
         }
     }
-    componentDidMount() {
-        if (this.state.attributes.length == 0) {
-            this.init()
+    componentDidMount( ) {
+        if ( this.state.attributes.length == 0 ) {
+            this.init( )
         }
-
     }
-    getDataType = (attribute) => {
-        return attribute.attribute_type.split(":").pop().toLowerCase();
+    getDataType = ( attribute ) => {
+        return attribute.attribute_type.split( ":" ).pop( ).toLowerCase( );
     }
-    searchById = (id) => {
-        let result = this.state.attributes.find((attribute, index) => {
+    searchById = ( id ) => {
+        let result = this.state.attributes.find( ( attribute, index ) => {
             return attribute.id === id
-        })
+        } )
         return result
     }
-    getFieldList(fieldType) {
+    getFieldList( fieldType ) {
         let fieldList = null
-
-        switch (fieldType) {
-            case "text":
-                fieldList = t.enums({
-                    text: 'Text',
-                    textarea: 'Multi-line Text',
-                    select: "Drop Down List",
-                    checkboxList: "Checkbox List",
-                    radioList: "Radio Button List"
-                })
-                break
-            case "number":
-                fieldList = t.enums({
-                    number: "Number",
-                    chekbox: "Checkbox",
-                    select: "Drop Down List",
-                    radioList: "Radio Button List"
-                })
-                break
-            case "boolean":
-                fieldList = t.enums({ chekbox: "Checkbox" });
-                break
-            case "datatime":
-                fieldList = t.enums({
-                    text: 'Text',
-                    textarea: 'Multi-line Text',
-                    number: "Number",
-                    chekbox: "Checkbox",
-                    select: "Drop Down List",
-                    checkboxList: "Checkbox List",
-                    radioList: "Radio Button List",
-                    datatime: "Date"
-                })
-                break
+        switch ( fieldType ) {
+        case "text":
+            fieldList = t.enums( {
+                text: 'Text',
+                textarea: 'Multi-line Text',
+                select: "Drop Down List",
+                checkboxList: "Checkbox List",
+                radioList: "Radio Button List"
+            } )
+            break
+        case "number":
+            fieldList = t.enums( {
+                number: "Number",
+                chekbox: "Checkbox",
+                select: "Drop Down List",
+                radioList: "Radio Button List"
+            } )
+            break
+        case "boolean":
+            fieldList = t.enums( { chekbox: "Checkbox" } );
+            break
+        case "datatime":
+            fieldList = t.enums( {
+                text: 'Text',
+                textarea: 'Multi-line Text',
+                number: "Number",
+                chekbox: "Checkbox",
+                select: "Drop Down List",
+                checkboxList: "Checkbox List",
+                radioList: "Radio Button List",
+                datatime: "Date"
+            } )
+            break
         }
         return fieldList
     }
-    generateForm = (attribute) => {
-        let fieldList = this.getFieldList(attribute.fieldType) || this.getFieldList(initialTypeMapping[attribute.dataType] || "text")
-        console.log(attribute.fieldType, fieldList)
-        const fieldConfig = t.struct({
+    generateForm = ( attribute ) => {
+        let fieldList = this.getFieldList( attribute.fieldType ) || this.getFieldList(
+            initialTypeMapping[ attribute.dataType ] || "text" )
+        const fieldConfig = t.struct( {
             name: t.String,
             dataType: t.String,
             label: t.String,
@@ -98,8 +97,8 @@ export default class FormFields extends Component {
             required: t.Boolean,
             defaultValue: t.String,
             fieldType: fieldList,
-            options: t.list(Options)
-        })
+            options: t.list( Options )
+        } )
         const defaultValue = {
             name: attribute.name,
             dataType: attribute.dataType,
@@ -112,64 +111,62 @@ export default class FormFields extends Component {
             required: attribute.required,
             defaultValue: attribute.defaultValue
         }
-        console.log(fieldConfig, defaultValue)
-        this.setState({ fieldConfig: fieldConfig, defaultValue: defaultValue })
+        this.setState( { fieldConfig: fieldConfig, defaultValue: defaultValue } )
     }
-    updateAttribute = (attribute) => {
+    updateAttribute = ( attribute ) => {
         let { attributes } = this.state
-        let currentAtrribute = this.searchById(attribute.id)
-        if (currentAtrribute) {
-            const id = attributes.indexOf(currentAtrribute)
-            let updatedObj = update(currentAtrribute, { $merge: attribute })
-            attributes[id] = updatedObj
-            this.setState({ attributes: attributes })
-
+        let currentAtrribute = this.searchById( attribute.id )
+        if ( currentAtrribute ) {
+            const id = attributes.indexOf( currentAtrribute )
+            let updatedObj = update( currentAtrribute, { $merge: attribute } )
+            attributes[ id ] = updatedObj
+            this.setState( { attributes: attributes } )
         }
-
     }
-    init = () => {
-        let attributes = [];
-        this.state.allAttributes.map((attribute) => {
-
-            if (attribute.attribute_type.indexOf("gml") == 0) {
-                this.setState({ geometryName: attribute.attribute })
+    init = ( ) => {
+        let attributes = [ ];
+        this.setState( { loading: true } )
+        this.state.allAttributes.map( ( attribute ) => {
+            if ( attribute.attribute_type.indexOf( "gml" ) == 0 ) {
+                this.setState( { geometryName: attribute.attribute } )
                 return;
             }
-            let dataType = this.getDataType(attribute);
-            attributes.push({
+            let dataType = this.getDataType( attribute );
+            attributes.push( {
                 included: true,
                 name: attribute.attribute,
                 id: attribute.id,
                 label: attribute.attribute_label ||
-                attribute.attribute,
+                    attribute.attribute,
                 placeholder: attribute.attribute_label ||
-                attribute.attribute,
+                    attribute.attribute,
                 helpText: "",
                 required: false,
                 defaultValue: null,
-                options: [],
+                options: [ ],
                 dataType: dataType,
-                fieldType: initialTypeMapping[dataType] ||
-                "text"
-            });
-        })
-        this.setState({ attributes: attributes })
+                fieldType: initialTypeMapping[ dataType ] ||
+                    "text"
+            } );
+        } )
+        this.setState( { attributes: attributes, loading: false } )
     }
-    includeChanged = (id) => {
+    includeChanged = ( id ) => {
         let { attributes } = this.state;
-        let currentAtrribute = this.searchById(id)
-        attributes[attributes.indexOf(currentAtrribute)].included =
-            this.refs["attr_check_" + id].checked
-        this.setState({ attributes: attributes })
+        let currentAtrribute = this.searchById( id )
+        attributes[ attributes.indexOf( currentAtrribute ) ].included =
+            this.refs[ "attr_check_" + id ].checked
+        this.setState( { attributes: attributes } )
     }
-    openModal = (attribute) => {
-        this.generateForm(attribute)
-        this.setState({ showModal: true })
+    openModal = ( attribute ) => {
+        this.generateForm( attribute )
+        this.setState( { showModal: true } )
     }
-    handleHideModal = () => {
-        this.setState({ showModal: false })
+    handleHideModal = ( ) => {
+        this.setState( { showModal: false } )
     }
-    render() {
+    render( ) {
+        let { loading } = this.state
         return (
             <div className="row">
                 <div className="row">
@@ -181,7 +178,7 @@ export default class FormFields extends Component {
 
                                 margin: "0px 3px 0px 3px"
                             }}
-                            className="btn btn-primary btn-sm pull-right"
+                            className={loading ? "btn btn-primary btn-sm pull-right disabled" :"btn btn-primary btn-sm pull-right"}
                             onClick={() => {
                                 this.props.onComplete({attributes: this.state.attributes, geometryName: this.state.geometryName })
                             }}>{"next "}

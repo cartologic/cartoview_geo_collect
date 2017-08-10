@@ -68,7 +68,6 @@ export default class NavigationTools extends Component {
         }
     }
     render( ) {
-        console.log( this.state.defaultConfig )
         return (
             <div className="row">
 				<div className="row">

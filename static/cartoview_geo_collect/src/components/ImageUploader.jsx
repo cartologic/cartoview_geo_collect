@@ -2,7 +2,7 @@ import FileBase64 from 'react-file-base64'
 import PropTypes from 'prop-types'
 import React from 'react'
 export default class ImageUploader extends React.Component {
-    constructor( props) {
+    constructor( props ) {
         super( props )
         this.state = {
             file: this.props.config ? this.props.config.logo : null,
@@ -12,14 +12,20 @@ export default class ImageUploader extends React.Component {
     getFiles( file ) {
         let imageRegx = new RegExp( '^image\/*', 'i' )
         if ( imageRegx.test( file.type ) ) {
-            this.setState( { file: file, messages: "" }, ( ) =>
-                console.log( this.state.file ) )
+            console.log(Math.ceil( file.file.size / Math.pow( 1024, 2 )))
+            if ( Math.ceil( file.file.size / Math.pow( 1024, 2 ), 2 ) >
+                3 ) {
+                this.setState( { messages: "Max File Size is 3 MB" } )
+            } else {
+                this.setState( { file: file, messages: "" }, ( ) =>
+                    console.log( this.state.file ) )
+            }
         } else {
             this.setState( { messages: "this file isn't an image" } )
         }
     }
     save = ( ) => {
-        this.props.onComplete({logo:this.state.file})
+        this.props.onComplete( { logo: this.state.file } )
     }
     render( ) {
         let { file, messages } = this.state

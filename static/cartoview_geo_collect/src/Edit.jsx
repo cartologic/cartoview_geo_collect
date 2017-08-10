@@ -110,6 +110,7 @@ export default class Edit extends Component {
                     attributes: this.state.attributes,
                     config: this.props.config.instance ? this.props.config
                         .instance.config : null,
+                    currentConfig:this.state.config,
                     urls: this.props.config.urls,
                     onComplete: ( config ) => {
                         let { step } = this.state

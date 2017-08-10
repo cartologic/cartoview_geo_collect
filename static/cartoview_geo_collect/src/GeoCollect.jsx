@@ -3,6 +3,7 @@ import './css/geoform.css'
 import React, { Component } from 'react'
 import { Route, Router, hashHistory } from 'react-router'
 
+import AlertContainer from 'react-alert'
 import InfoPage from './components/InfoPage'
 import MapViewer from './components/MapViewer.jsx'
 import PropTypes from 'prop-types'
@@ -162,7 +163,6 @@ class GeoCollect extends Component {
                     const fid = featureElements[0].getAttribute(
                         "fid").split(".").pop()
                     const fileFormValue = this.fileForm.getValue()
-                    console.log(fileFormValue)
                     const fd = new FormData()
                     fd.append('file', fileFormValue.file,
                         fileFormValue.file.name)
@@ -173,13 +173,32 @@ class GeoCollect extends Component {
                         credentials: 'include',
                         body: fd
                     }).then(res => res.json()).then(res => {
-                        history.push('/')
+                        // history.push( '/' )
+                        this.setState({ saving: false })
+                        this.msg.show(
+                            'Your Data Saved successfully', {
+                                time: 5000,
+                                type: 'success',
+                                icon: <i style={{ color: "#4caf50" }} className="fa fa-check-square-o fa-lg" aria-hidden="true"></i>
+                            })
+                    }).catch((error) => {
+                        this.msg.show(
+                            'Error while saving Data please Contact our Support', {
+                                time: 5000,
+                                type: 'success',
+                                icon: <i style={{ color: "#e2372a" }} className="fa fa-times-circle-o fa-lg" aria-hidden="true"></i>
+                            })
                     })
                 }
                 //ogc:FeatureId
+            }).catch((error) => {
+                this.msg.show(
+                    'Error while saving Data please Contact our Support', {
+                        time: 5000,
+                        type: 'success',
+                        icon: <i style={{ color: "#e2372a" }} className="fa fa-times-circle-o fa-lg" aria-hidden="true"></i>
+                    })
             })
-
-       
     }
     layerName() {
         return this.props.layer.split(":").pop()
@@ -236,11 +255,20 @@ class GeoCollect extends Component {
         console.log(component)
         this.setState({ currentComponent: component })
     }
+    alertOptions = {
+        offset: 14,
+        position: 'top right',
+        theme: 'light',
+        time: 5000,
+        transition: 'scale'
+    }
     render() {
-        const { formTitle, mapId, attributes, appName, description } = this.props
+        const { formTitle, mapId, attributes, appName, description } =
+            this.props
         const { xyValue, saving, currentComponent } = this.state
         return (
             <div className="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                <AlertContainer ref={a => this.msg = a} {...this.alertOptions} />
                 <div>
                     {this.state.showModal && <QuestionModal handleHideModal={this.showModal} onYes={this.onYes} />}
                     <div className="row collector-title">
@@ -254,7 +282,7 @@ class GeoCollect extends Component {
                     </div>
                     <AttrsForm key="attrsForm" attributes={attributes} ref={f => this.form = f} />
                     <FileForm message={this.state.message} ref={f => this.fileForm = f} key="fileform" />
-                    <div className="panel panel-primary">
+                    <div className="panel panel-primary" style={{display:"none"}}>
                         <div className="panel-heading">Select Location</div>
                         <div className="panel-body">
                             {this.getXYForm()}
@@ -278,12 +306,14 @@ class GeoCollect extends Component {
 global.GeoCollect = {
     show: (el, props) => {
         var geoCollect = React.createElement(GeoCollect, props)
-        ReactDOM.render(<Router history={history}>
-            <div>
-                <Route exact path="/" render={() => <InfoPage description={props.description} title={props.appName} />} />
-                <Route path="/form" render={() => <GeoCollect {...props} />} />
-            </div>
-        </Router>, document.getElementById(el))
+        ReactDOM.render(
+            <Router history={history}>
+                <div>
+                    <Route exact path="/" render={() => <InfoPage description={props.description} title={props.appName} />} />
+                    <Route path="/form" render={() => <GeoCollect {...props} />} />
+                </div>
+            </Router>,
+            document.getElementById(el))
     }
 }
 export default GeoCollect
