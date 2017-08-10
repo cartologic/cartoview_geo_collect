@@ -257,8 +257,8 @@ class GeoCollect extends Component {
     }
     alertOptions = {
         offset: 14,
-        position: 'bottom left',
-        theme: 'dark',
+        position: 'top right',
+        theme: 'light',
         time: 5000,
         transition: 'scale'
     }

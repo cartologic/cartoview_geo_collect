@@ -54,7 +54,7 @@ export default class FieldConfigModal extends Component {
 							<button type="button" className="close" data-dismiss="modal" aria-label="Close">
 								<span aria-hidden="true">&times;</span>
 							</button>
-							<h4 className="modal-title">Modal title</h4>
+							<h4 className="modal-title">{"Options"}</h4>
 						</div>
 						<div className="modal-body">
 							<Form
