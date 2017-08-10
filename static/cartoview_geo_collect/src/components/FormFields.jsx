@@ -20,7 +20,7 @@ export default class FormFields extends Component {
     constructor( props ) {
         super( props )
         this.state = {
-            attributes: this.props.config ? this.props.config.attributes : [ ],
+            attributes: this.props.config && this.props.currentConfig.layer === this.props.config.layer ? this.props.config.attributes : [ ],
             geometryName: undefined,
             allAttributes: this.props.attributes,
             showModal: false,
