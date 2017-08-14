@@ -267,6 +267,7 @@ class GeoCollect extends Component {
             this.props
         const { xyValue, saving, currentComponent } = this.state
         return (
+            <div className="row" style={{paddingTop:50,paddingBottom:50}}>
             <div className="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                 <AlertContainer ref={a => this.msg = a} {...this.alertOptions} />
                 <div>
@@ -300,6 +301,7 @@ class GeoCollect extends Component {
                     </div>
                 </div>
             </div>
+            </div>
         )
     }
 }
@@ -309,7 +311,7 @@ global.GeoCollect = {
         ReactDOM.render(
             <Router history={history}>
                 <div>
-                    <Route exact path="/" render={() => <InfoPage description={props.description} title={props.appName} />} />
+                    <Route exact path="/" render={() => <InfoPage description={props.formAbstract} title={props.formTitle} />} />
                     <Route path="/form" render={() => <GeoCollect {...props} />} />
                 </div>
             </Router>,

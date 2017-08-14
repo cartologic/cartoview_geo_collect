@@ -1,6 +1,6 @@
-import React from 'react';
-import {render, findDOMNode} from 'react-dom';
 import Edit from './Edit.jsx';
+import React from 'react';
+import {render} from 'react-dom';
 class Viewer {
   constructor(domId, config, username) {
     this.domId = domId;

@@ -27,7 +27,7 @@ def collect_data(request, instance_id):
                     context=context)
 
 
-def generate_thumbnails(base64_image, size=(64, 64)):
+def generate_thumbnails(base64_image, size=(250, 250)):
     format, image = base64_image.split(';base64,')
     image = b64decode(image)
     dirpath = tempfile.mkdtemp()
