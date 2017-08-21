@@ -12,13 +12,11 @@ export default class ImageUploader extends React.Component {
     getFiles( file ) {
         let imageRegx = new RegExp( '^image\/*', 'i' )
         if ( imageRegx.test( file.type ) ) {
-            console.log(Math.ceil( file.file.size / Math.pow( 1024, 2 )))
             if ( Math.ceil( file.file.size / Math.pow( 1024, 2 ), 2 ) >
                 3 ) {
                 this.setState( { messages: "Max File Size is 3 MB" } )
             } else {
-                this.setState( { file: file, messages: "" }, ( ) =>
-                    console.log( this.state.file ) )
+                this.setState( { file: file, messages: "" } )
             }
         } else {
             this.setState( { messages: "this file isn't an image" } )

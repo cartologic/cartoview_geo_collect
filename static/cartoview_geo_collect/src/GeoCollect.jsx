@@ -1,15 +1,16 @@
 import './css/geoform.css'
 
 import React, { Component } from 'react'
-import { Route, Router, hashHistory } from 'react-router'
+import { Route, Router } from 'react-router'
 
 import AlertContainer from 'react-alert'
+import FileBase64 from 'react-file-base64'
 import InfoPage from './components/InfoPage'
 import MapViewer from './components/MapViewer.jsx'
-import PropTypes from 'prop-types'
 import QuestionModal from './components/QuestionModal'
 import ReactDOM from 'react-dom'
 import WFSClient from './utils/WFSClient.jsx'
+import { getCRSFToken } from './helpers/helpers.jsx'
 import history from './components/history'
 import ol from 'openlayers'
 import t from 'tcomb-form'
@@ -88,22 +89,48 @@ class AttrsForm extends Component {
     }
 }
 class FileForm extends Component {
+    constructor(props) {
+        super(props)
+        this.state = {
+            file: null,
+            messages: ""
+        }
+    }
     getValue() {
-        return { file: this.input.files[0] }
+        let file = this.state.file
+        if (!file) {
+            this.setState({ messages: "Please select an image" })
+        }
+        return file
+    }
+    getFiles(file) {
+        let imageRegx = new RegExp('^image\/*', 'i')
+        if (imageRegx.test(file.type)) {
+            if (Math.ceil(file.file.size / Math.pow(1024, 2), 2) >
+                5) {
+                this.setState({ messages: "Max File Size is 5 MB" })
+            } else {
+                this.setState({ file: file, messages: "" })
+            }
+        } else {
+            this.setState({ messages: "this file isn't an image" })
+        }
     }
     render() {
-        let { message } = this.props
+        let { messages, file } = this.state
         return (
             <div className="panel panel-primary">
                 <div className="panel-heading">Images</div>
                 <div className="panel-body">
-                    <div className="form-group">
-                        {message && <div className="alert alert-danger">
-                            <strong>Error!</strong> {message}
-                        </div>}
-                        <label>Image</label>
-                        <input type="file" ref={i => this.input = i} />
-                    </div>
+                    <FileBase64
+                        multiple={false}
+                        onDone={this.getFiles.bind(this)} />
+                    <h4 style={{ color: "red" }}>{messages}</h4>
+                    {file && <div className="row" style={{ marginTop: "5%" }}>
+                        <div className="col-xs-12 col-sm-12 col-md-6 col-md-offset-3">
+                            <img className="img-responsive" src={file.base64} />
+                        </div>
+                    </div>}
                 </div>
             </div>
         )
@@ -134,17 +161,13 @@ class GeoCollect extends Component {
     WFS = new WFSClient(this.props.geoserverUrl)
     onSubmit = (e) => {
         e.preventDefault()
-        typeof (this.fileForm.getValue().file) === "undefined" ? this.setState({ message: "Please select Image" }) :
-            this.setState({ message: null })
-        if (this.form.getValue() && this.xyForm.getValue() && typeof (
-            this.fileForm.getValue().file) !== "undefined") {
+        if (this.form.getValue() && this.xyForm.getValue() && this.fileForm.getValue()) {
             this.showModal()
         }
     }
     saveAll = () => {
         const { layer, geometryName, uploadUrl } = this.props
         const properties = Object.assign({}, this.form.getValue())
-        // console.log( properties )
         const geometry = Object.assign({
             name: geometryName,
             srsName: "EPSG:4326"
@@ -161,26 +184,37 @@ class GeoCollect extends Component {
                     'http://www.opengis.net/ogc', 'FeatureId')
                 if (featureElements.length > 0) {
                     const fid = featureElements[0].getAttribute(
-                        "fid").split(".").pop()
+                        "fid")
                     const fileFormValue = this.fileForm.getValue()
-                    const fd = new FormData()
-                    fd.append('file', fileFormValue.file,
-                        fileFormValue.file.name)
-                    fd.append('layer', layer.split(":").pop())
-                    fd.append('fid', fid)
-                    fetch(uploadUrl, {
+                    const data = { file: fileFormValue.base64, file_name: fileFormValue.name, username: this.props.username,is_image:true, feature_id: fid,tags:['geo_collect_'+this.layerName()] }
+                    //TODO: remove static url
+                    fetch(`/apps/cartoview_attachment_manager/${this.layerName()}/file`, {
                         method: 'POST',
-                        credentials: 'include',
-                        body: fd
-                    }).then(res => res.json()).then(res => {
+                        credentials: "same-origin",
+                        headers: new Headers({
+                            "Content-Type": "application/json; charset=UTF-8",
+                            "X-CSRFToken": getCRSFToken()
+                        }),
+                        body: JSON.stringify(data)
+                    }).then((response) => response.json()).then(res => {
                         // history.push( '/' )
-                        this.setState({ saving: false })
-                        this.msg.show(
-                            'Your Data Saved successfully', {
-                                time: 5000,
-                                type: 'success',
-                                icon: <i style={{ color: "#4caf50" }} className="fa fa-check-square-o fa-lg" aria-hidden="true"></i>
-                            })
+                        if (res.error) {
+                            this.msg.show(
+                                'Error while saving Data please Contact our Support', {
+                                    time: 5000,
+                                    type: 'success',
+                                    icon: <i style={{ color: "#e2372a" }} className="fa fa-times-circle-o fa-lg" aria-hidden="true"></i>
+                                })
+                        } else {
+                            this.setState({ saving: false })
+                            this.msg.show(
+                                'Your Data Saved successfully', {
+                                    time: 5000,
+                                    type: 'success',
+                                    icon: <i style={{ color: "#4caf50" }} className="fa fa-check-square-o fa-lg" aria-hidden="true"></i>
+                                })
+                        }
+
                     }).catch((error) => {
                         this.msg.show(
                             'Error while saving Data please Contact our Support', {
@@ -189,6 +223,27 @@ class GeoCollect extends Component {
                                 icon: <i style={{ color: "#e2372a" }} className="fa fa-times-circle-o fa-lg" aria-hidden="true"></i>
                             })
                     })
+                    // fetch(`/apps/cartoview_attachment_manager/${this.layerName()}/comment`, {
+                    //     method: 'POST',
+                    //     credentials: 'include',
+                    //     body: fd
+                    // }).then(res => res.json()).then(res => {
+                    //     // history.push( '/' )
+                    //     this.setState({ saving: false })
+                    //     this.msg.show(
+                    //         'Your Data Saved successfully', {
+                    //             time: 5000,
+                    //             type: 'success',
+                    //             icon: <i style={{ color: "#4caf50" }} className="fa fa-check-square-o fa-lg" aria-hidden="true"></i>
+                    //         })
+                    // }).catch((error) => {
+                    //     this.msg.show(
+                    //         'Error while saving Data please Contact our Support', {
+                    //             time: 5000,
+                    //             type: 'success',
+                    //             icon: <i style={{ color: "#e2372a" }} className="fa fa-times-circle-o fa-lg" aria-hidden="true"></i>
+                    //         })
+                    // })
                 }
                 //ogc:FeatureId
             }).catch((error) => {
@@ -267,40 +322,40 @@ class GeoCollect extends Component {
             this.props
         const { xyValue, saving, currentComponent } = this.state
         return (
-            <div className="row" style={{paddingTop:50,paddingBottom:50}}>
-            <div className="col-xs-12 col-sm-12 col-md-12 col-lg-12">
-                <AlertContainer ref={a => this.msg = a} {...this.alertOptions} />
-                <div>
-                    {this.state.showModal && <QuestionModal handleHideModal={this.showModal} onYes={this.onYes} />}
-                    <div className="row collector-title">
-                        <div style={{ textAlign: '-webkit-center' }} className="col-xs-4 col-sm-2 col-md-2 vcenter">
-                            <img style={{ height: 60 }} className="img-responsive img-rounded" src={this.props.logo.base64} />
-
-                        </div>
-                        <div className="col-xs-8 col-sm-9 col-md-9 vcenter">
-                            <span className="h3"><b>{formTitle || 'Add'}</b></span>
-                        </div>
-                    </div>
-                    <AttrsForm key="attrsForm" attributes={attributes} ref={f => this.form = f} />
-                    <FileForm message={this.state.message} ref={f => this.fileForm = f} key="fileform" />
-                    <div className="panel panel-primary" style={{display:"none"}}>
-                        <div className="panel-heading">Select Location</div>
-                        <div className="panel-body">
-                            {this.getXYForm()}
-                        </div>
-                    </div>
+            <div className="row" style={{ paddingTop: 50, paddingBottom: 50 }}>
+                <div className="col-xs-12 col-sm-12 col-md-12 col-lg-12">
+                    <AlertContainer ref={a => this.msg = a} {...this.alertOptions} />
                     <div>
-                        <MapViewer moving={this.state.moving} changeXY={this.changeXY} map={this.map} mapId={mapId} xy={xyValue} onMapReady={this.onMapReady} onFeatureMove={this.onFeatureMove} EnableGeolocation={this.props.EnableGeolocation} />
-                    </div>
-                    <hr />
-                    <div className="form-group" style={{ marginTop: "2%" }}>
-                        <button onClick={this.onSubmit} className="btn btn-primary" disabled={saving}>
-                            {saving && <div className="loading"></div>}
-                            Submit
+                        {this.state.showModal && <QuestionModal handleHideModal={this.showModal} onYes={this.onYes} />}
+                        <div className="row collector-title">
+                            <div style={{ textAlign: '-webkit-center' }} className="col-xs-4 col-sm-2 col-md-2 vcenter">
+                                <img style={{ height: 60 }} className="img-responsive img-rounded" src={this.props.logo.base64} />
+
+                            </div>
+                            <div className="col-xs-8 col-sm-9 col-md-9 vcenter">
+                                <span className="h3"><b>{formTitle || 'Add'}</b></span>
+                            </div>
+                        </div>
+                        <AttrsForm key="attrsForm" attributes={attributes} ref={f => this.form = f} />
+                        <FileForm message={this.state.message} ref={f => this.fileForm = f} key="fileform" />
+                        <div className="panel panel-primary" style={{ display: "none" }}>
+                            <div className="panel-heading">Select Location</div>
+                            <div className="panel-body">
+                                {this.getXYForm()}
+                            </div>
+                        </div>
+                        <div>
+                            <MapViewer moving={this.state.moving} changeXY={this.changeXY} map={this.map} mapId={mapId} xy={xyValue} onMapReady={this.onMapReady} onFeatureMove={this.onFeatureMove} EnableGeolocation={this.props.EnableGeolocation} />
+                        </div>
+                        <hr />
+                        <div className="form-group" style={{ marginTop: "2%" }}>
+                            <button onClick={this.onSubmit} className="btn btn-primary" disabled={saving}>
+                                {saving && <div className="loading"></div>}
+                                Submit
                                 </button>
+                        </div>
                     </div>
                 </div>
-            </div>
             </div>
         )
     }

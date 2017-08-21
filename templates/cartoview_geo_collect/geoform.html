@@ -51,7 +51,8 @@
       props.formAbstract="{{instance.abstract}}"
       props.mapId =  {{ instance.map.id }};
       props.geoserverUrl = URLS.geoserver
-      props.uploadUrl = "{% url 'cartoview_geo_collect.attachment' %}"
+      props.uploadUrl = ""
+      props.username="{{request.user.username}}"
       GeoCollect.show('main-ct', props);
     </script>
 {% endblock %}

@@ -1,21 +1,19 @@
 
 import json
+import os
+import shutil
+import tempfile
+from base64 import b64decode, b64encode
 
 from cartoview.app_manager.models import App, AppInstance
 from cartoview.app_manager.views import _resolve_appinstance
-from cartoview_attachment_manager.dynamic import create_file_model
 from django.contrib.auth.decorators import login_required
 from django.shortcuts import HttpResponse, render
-from django.views.decorators.csrf import csrf_exempt
 from geonode.maps.views import _PERMISSION_MSG_VIEW
-from django.core.files.base import ContentFile
+from PIL import Image
+
 from . import APP_NAME, __version__
-from PIL import Image
-from base64 import b64decode, b64encode
-from PIL import Image
-import tempfile
-import shutil
-import os
+
 VIEW_MAP_TPL = "%s/geoform.html" % APP_NAME
 
 
@@ -146,30 +144,3 @@ def view_app(
         "instance": instance
     })
     return render(request, template, context)
-
-
-@login_required
-@csrf_exempt
-def attachment(request):
-    res = dict()
-    file = request.FILES['file']
-    model = create_file_model(request.POST['layer'])
-    model.objects.create(file=file.read(), file_name=file.name,
-                         user=request.user,
-                         feature=request.POST["fid"])
-    res["success"] = True
-    return HttpResponse(json.dumps(res), content_type="text/json")
-
-
-class MultiPartResource(object):
-    def deserialize(self, request, data, format=None):
-        if not format:
-            format = request.Meta.get('CONTENT_TYPE', 'application/json')
-        if format == 'application/x-www-form-urlencoded':
-            return request.POST
-        if format.startswith('multipart'):
-            data = request.POST.copy()
-            data.update(request.FILES)
-            return data
-        return super(MultiPartResource, self).deserialize(request, data,
-                                                          format)
