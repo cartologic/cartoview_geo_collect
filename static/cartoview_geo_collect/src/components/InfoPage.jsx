@@ -14,8 +14,6 @@ export default class InfoPage extends Component {
 
     }
     componentDidMount() {
-        setTimeout(()=>{ $('#info-title').addClass('animated fadOutUpBig')
-        $('#info-description').addClass('animated fadOutUpBig') }, 3000);
         
     }
     render() {
