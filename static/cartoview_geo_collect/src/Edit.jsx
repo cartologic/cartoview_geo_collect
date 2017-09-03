@@ -10,7 +10,6 @@ import LayerSelector from "./components/LayerSelector.jsx"
 import NavigationTools from './components/NavigationTools.jsx'
 import Navigator from './components/Navigator.jsx'
 import ResourceSelector from './components/ResourceSelector.jsx'
-
 export default class Edit extends Component {
     constructor( props ) {
         super( props )
@@ -57,51 +56,29 @@ export default class Edit extends Component {
                     }
                 }
             }, {
-                label: "General ",
-                component: General,
+                label: "Select Layer",
+                component: LayerSelector,
                 props: {
-                    state: this.state,
-                    keywords: this.props.keywords,
-                    urls: this.props.config.urls,
-                    instance: this.state.selectedResource,
+                    map: this.state.selectedResource,
+                    setAttributes: ( attributes ) => {
+                        this.setState( { attributes: attributes } )
+                    },
                     config: this.props.config.instance ? this.props.config
                         .instance.config : null,
-                    onComplete: ( basicConfig ) => {
+                    urls: this.props.config.urls,
+                    onComplete: ( listConfig ) => {
                         let { step } = this.state
+                        let currentConfig = this.state.config
+                        let newConfig = Object.assign(
+                            currentConfig, listConfig )
                         this.setState( {
-                            config: Object.assign( this.state
-                                .config, basicConfig )
-                        } )
-                        this.goToStep( ++step )
+                            config: currentConfig
+                        }, this.goToStep( ++step ) )
                     },
                     onPrevious: ( ) => {
                         this.onPrevious( )
                     }
                 }
-            },{
-                 label: "Select Layer",
-                 component: LayerSelector,
-                 props: {
-                     map: this.state.selectedResource,
-                     setAttributes: ( attributes ) => {
-                         this.setState( { attributes: attributes } )
-                     },
-                     config: this.props.config.instance ? this.props.config
-                         .instance.config : null,
-                     urls: this.props.config.urls,
-                     onComplete: ( listConfig ) => {
-                         let { step } = this.state
-                         let currentConfig = this.state.config
-                         let newConfig = Object.assign(
-                             currentConfig, listConfig )
-                         this.setState( {
-                             config: currentConfig
-                         }, this.goToStep( ++step ) )
-                     },
-                     onPrevious: ( ) => {
-                         this.onPrevious( )
-                     }
-                 }
              }, {
                 label: "Form Customization",
                 component: FormFields,
@@ -110,7 +87,7 @@ export default class Edit extends Component {
                     attributes: this.state.attributes,
                     config: this.props.config.instance ? this.props.config
                         .instance.config : null,
-                    currentConfig:this.state.config,
+                    currentConfig: this.state.config,
                     urls: this.props.config.urls,
                     onComplete: ( config ) => {
                         let { step } = this.state
@@ -138,6 +115,28 @@ export default class Edit extends Component {
                         this.setState( {
                             config: config
                         }, this.goToStep( ++step ) )
+                    },
+                    onPrevious: ( ) => {
+                        this.onPrevious( )
+                    }
+                }
+            }, {
+                label: "General ",
+                component: General,
+                props: {
+                    state: this.state,
+                    keywords: this.props.keywords,
+                    urls: this.props.config.urls,
+                    instance: this.state.selectedResource,
+                    config: this.props.config.instance ? this.props.config
+                        .instance.config : null,
+                    onComplete: ( basicConfig ) => {
+                        let { step } = this.state
+                        this.setState( {
+                            config: Object.assign( this.state
+                                .config, basicConfig )
+                        } )
+                        this.goToStep( ++step )
                     },
                     onPrevious: ( ) => {
                         this.onPrevious( )

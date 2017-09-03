@@ -31,7 +31,7 @@ export default class ImageUploader extends React.Component {
             <div className="col-xs-12 col-sm-12 col-md-12">
                 <div className="row">
                     <div className="col-xs-5 col-md-4">
-                        <h4>{'Instance Logo'}</h4>
+                        <h4>{'Logo'}</h4>
                     </div>
                     <div className="col-xs-7 col-md-8">
                         {file && <button
