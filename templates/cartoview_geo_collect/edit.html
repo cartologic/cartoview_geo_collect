@@ -1,7 +1,7 @@
 {% extends "app_manager/app_install_base.html" %}
 {% load bootstrap_tags staticfiles %}
 {% load i18n %}
-
+{% load cartoview_tags %}
 {% block title %} {{ block.super }} - {% trans "Cartoview Geoform" %} {% endblock %}
 {% block head %}
     {% include "geonode/ext_header.html" %}
@@ -32,7 +32,8 @@
   var title = "{{ instance.title }}";
   var map_id={{instance.map_id}};
   var instance_id={{instance.id}};
-  var geoserver_url = "{{ GEOSERVER_BASE_URL }}";
+  var geoserver_url = "{{ GEOSERVER_BASE_URL }}"
+  var keywords = {{instance.keyword_list|jsonify}}
   var abstract = " {% spaceless %}{{ instance.abstract|title }}{% endspaceless %} ";
   {% endif %}
     var username="{{instance.owner.username}}"
@@ -46,7 +47,7 @@
 <div class="modal-content">
   <div class="modal-header">
     <button type="button" class="close" data-dismiss="modal">&times;</button>
-    <h4 class="modal-title">Cartoview Geoform</h4>
+    <h4 class="modal-title">Cartoview GeoCollect</h4>
   </div>
   <div class="modal-body">
     <p>collect XY Location and associate Attributes and Images. Work Field Crews Can utilize this Application To Collect Information About Assets .Users can also use this Application To report Issues or Collect New Features . once the data is Saved it Will Be directly Saved To the server,to setup your app author a new shapefile then upload it to the server then follow the instructions,users will use the app to save data to this layer</p>

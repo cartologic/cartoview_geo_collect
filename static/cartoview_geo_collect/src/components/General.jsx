@@ -1,68 +1,76 @@
 import React, { Component } from 'react';
-import t from 'tcomb-form';
 
 import KeywordsInput from './KeywordsInput.jsx'
-
-const Access = t.enums({
-	public: 'Public', private: 'Private (only me)',
-	// others: 'Other Users'
-});
-const mapConfig = t.struct({ title: t.String, abstract: t.String, access: Access });
-const options = {
-	fields: {
-		title: {
-			label: "App Title"
-		},
-		access: {
-			factory: t.form.Radio
-		}
-	}
-};
+import t from 'tcomb-form';
 const Form = t.form.Form;
-
+const options = {
+    fields: {
+        title: {
+            label: "App Title"
+        },
+        access: {
+            help: 'Use <ctrl> or <cmd> key to choose multiple users',
+            factory: t.form.Select
+        }
+    }
+}
 export default class General extends Component {
-	constructor( props ) {
-		super( props )
-		this.state = {
-			defaultConfig: {
-				title: this.props.state.config.title
-					? this.props.state.config.title
-					: this.props.instance.title || "No Title Provided",
-				abstract: this.props.state.config.abstract
-					? this.props.state.config.abstract
-					: this.props.instance.abstract || "No Abstract Provided",
-				access: this.props.state.config.access
-					? this.props.state.config.access
-					: this.props.config
-						? this.props.config.access
-						: 'private'
-			}
-		}
-	}
-
-	save( ) {
-		var basicConfig = this.refs.form.getValue( );
-		if ( basicConfig ) {
-			let properConfig = {
-				title: basicConfig.title,
-				abstract: basicConfig.abstract,
-				access: basicConfig.access,
-				keywords: this.keywords
-			}
-			this.props.onComplete( properConfig )
-		}
-	}
-
-	Keywords = [ ]
-	updateKeywords( keywords ) {
-		this.keywords = keywords.map(( keyword ) => {
-			return keyword.name
-		})
-	}
-
-	render( ) {
-		return (
-			<div className="row">
+    constructor( props ) {
+        super( props )
+        this.state = {
+            defaultConfig: {
+                title: this.props.state.config.title ? this.props.state
+                    .config.title : this.props.instance.title ||
+                    "No Title Provided",
+                abstract: this.props.state.config.abstract ? this.props
+                    .state.config.abstract : this.props.instance.abstract ||
+                    "No Abstract Provided",
+                access: this.props.state.config.access ? this.props.state
+                    .config.access : this.props.config ? this.props.config
+                    .access : 'private'
+            },
+            users: {}
+        }
+    }
+    componentWillMount( ) {
+        fetch( "/api/profiles/" ).then( ( response ) => response.json( ) )
+            .then( ( data ) => {
+                let users = {}
+                data.objects.forEach( user => {
+                    users[ user.username ] =
+                        `${user.username} , email: <${user.email!==""? user.email: "no Email"}> `
+                } )
+                this.setState( { users } )
+            } )
+    }
+    save( ) {
+        var basicConfig = this.refs.form.getValue( );
+        if ( basicConfig ) {
+            console.log( basicConfig )
+            let properConfig = {
+                title: basicConfig.title,
+                abstract: basicConfig.abstract,
+                access: basicConfig.access,
+                keywords: this.keywords
+            }
+            this.props.onComplete( properConfig )
+        }
+    }
+    Keywords = [ ]
+    updateKeywords( keywords ) {
+        this.keywords = keywords.map( ( keyword ) => {
+            return keyword.name
+        } )
+    }
+    render( ) {
+        let access = t.enums( this.state.users )
+        let mapConfig = t.struct( {
+            title: t.String,
+            abstract: t.String,
+            access: t.list( access )
+        } )
+        return (
+            <div className="row">
 				<div className="row">
 					<div className="col-xs-5 col-md-4">
 						<h4>{'General'}</h4>
@@ -102,8 +110,9 @@ export default class General extends Component {
 				}}
 					keywords={this.props.state.config.keywords
 					? this.props.state.config.keywords
-					: this.props.keywords}/>
+					: typeof(keywords)==="undefined" ? [] : keywords}/>
+				<small>{"use <enter> key to seperate  keywords"}</small>
 			</div>
-		)
-	}
+        )
+    }
 }

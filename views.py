@@ -80,22 +80,14 @@ def save(request, instance_id=None, app_name=APP_NAME):
         'change_resourcebase_permissions',
         'publish_resourcebase',
     ]
-
-    if access == "private":
-        permessions = {
-            'users': {
-                '{}'.format(request.user): owner_permissions,
-            }
-        }
-    else:
-        permessions = {
-            'users': {
-                '{}'.format(request.user): owner_permissions,
-                'AnonymousUser': [
-                    'view_resourcebase',
-                ],
-            }
-        }
+    # access limited to specific users
+    users_permissions = {'{}'.format(request.user): owner_permissions}
+    for user in access:
+        if user != request.user.username:
+            users_permissions.update({user: ['view_resourcebase', ]})
+    permessions = {
+        'users': users_permissions
+    }
     # set permissions so that no one can view this appinstance other than
     #  the user
     instance_obj.set_permissions(permessions)
