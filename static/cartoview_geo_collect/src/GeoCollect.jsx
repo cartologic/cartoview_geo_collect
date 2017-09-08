@@ -15,35 +15,27 @@ import history from './components/history'
 import ol from 'openlayers'
 import t from 'tcomb-form'
 
-var modalStyle = {
-    transform: 'rotate(45deg) translateX(-50%)',
-};
-var backdropStyle = {
-    backgroundColor: 'red'
-};
-var contentStyle = {
-    backgroundColor: 'blue',
-    height: '100%'
-};
 // check if number is int
-const Int = t.refinement(t.Number, (n) => n % 1 == 0)
-const getSRSName = (geojson) => {
+const Int = t.refinement( t.Number, ( n ) => n % 1 == 0 )
+const getSRSName = ( geojson ) => {
     //"EPSG:900913"
-    const srs = geojson.crs.properties.name.split(":").pop()
+    const srs = geojson.crs.properties.name.split( ":" ).pop( )
     return "EPSG:" + srs
 }
 class AttrsForm extends Component {
-    getValue() {
-        return this.form.getValue()
+    state = {
+        schema: {},
+        fields: {},
+        value: {}
     }
-    render() {
+    buildForm = ( ) => {
         const { attributes } = this.props
         const schema = {},
             fields = {},
             value = {}
-        attributes.forEach(a => {
-            if (a.included) {
-                fields[a.name] = {
+        attributes.forEach( a => {
+            if ( a.included ) {
+                fields[ a.name ] = {
                     label: a.label,
                     help: a.helpText,
                     type: a.fieldType,
@@ -51,33 +43,51 @@ class AttrsForm extends Component {
                         placeholder: a.placeholder
                     }
                 }
-                value[a.name] = a.defaultValue
-                if (a.fieldType == "select") {
+                value[ a.name ] = a.defaultValue
+                if ( a.fieldType == "select" ) {
                     const options = {}
-                    a.options.forEach(o => options[o.value] = o
-                        .label)
-                    schema[a.name] = t.enums(options)
-                } else if (a.fieldType == "number") {
-                    fields[a.name].type = 'number'
-                    schema[a.name] = a.dataType == "int" ? Int :
+                    a.options.forEach( o => options[ o.value ] = o
+                        .label )
+                    schema[ a.name ] = t.enums( options )
+                } else if ( a.fieldType == "number" ) {
+                    fields[ a.name ].type = 'number'
+                    schema[ a.name ] = a.dataType == "int" ? Int :
                         t.Number
-                } else if (a.fieldType == "checkbox") {
-                    schema[a.name] = t.Bool
+                } else if ( a.fieldType == "checkbox" ) {
+                    schema[ a.name ] = t.Bool
                 }
                 //default case if data type is string
                 // here field type may be text or textarea
-                else if (a.dataType == "string") {
-                    schema[a.name] = t.String
+                else if ( a.dataType == "string" ) {
+                    schema[ a.name ] = t.String
                 }
-                if (schema[a.name]) {
-                    if (a.required) {
-                        fields[a.name].help += " (Required)"
+                if ( schema[ a.name ] ) {
+                    if ( a.required ) {
+                        fields[ a.name ].help += " (Required)"
                     } else {
-                        schema[a.name] = t.maybe(schema[a.name])
+                        schema[ a.name ] = t.maybe( schema[ a.name ] )
                     }
                 }
             }
-        })
+        } )
+        this.setState( {
+            schema,
+            value,
+            fields
+        } )
+    }
+    componentWillMount( ) {
+        this.buildForm( )
+    }
+    getValue( ) {
+        const value = this.form.getValue( )
+        if ( value ) {
+            this.setState( { value } )
+        }
+        return value
+    }
+    render( ) {
+        let { schema, value, fields } = this.state
         return (
             <div className="panel panel-primary">
                 <div className="panel-heading">Enter Information</div>
@@ -89,34 +99,39 @@ class AttrsForm extends Component {
     }
 }
 class FileForm extends Component {
-    constructor(props) {
-        super(props)
+    constructor( props ) {
+        super( props )
         this.state = {
             file: null,
             messages: ""
         }
     }
-    getValue() {
+    getValue( ) {
         let file = this.state.file
-        if (!file) {
-            this.setState({ messages: "Please select an image" })
+        if ( !file ) {
+            this.setState( { messages: "Please select an image" } )
         }
         return file
     }
-    getFiles(file) {
-        let imageRegx = new RegExp('^image\/*', 'i')
-        if (imageRegx.test(file.type)) {
-            if (Math.ceil(file.file.size / Math.pow(1024, 2), 2) >
-                5) {
-                this.setState({ messages: "Max File Size is 5 MB" })
+    reset = ( ) => {
+        this.setState( {
+            file: null,
+            messages: ""
+        } )
+    }
+    getFiles( file ) {
+        let imageRegx = new RegExp( '^image\/*', 'i' )
+        if ( imageRegx.test( file.type ) ) {
+            if ( Math.ceil( file.file.size / Math.pow( 1024, 2 ), 2 ) > 5 ) {
+                this.setState( { messages: "Max File Size is 5 MB" } )
             } else {
-                this.setState({ file: file, messages: "" })
+                this.setState( { file: file, messages: "" } )
             }
         } else {
-            this.setState({ messages: "this file isn't an image" })
+            this.setState( { messages: "this file isn't an image" } )
         }
     }
-    render() {
+    render( ) {
         let { messages, file } = this.state
         return (
             <div className="panel panel-primary">
@@ -137,133 +152,124 @@ class FileForm extends Component {
     }
 }
 class GeoCollect extends Component {
-    constructor(props) {
-        super(props)
+    constructor( props ) {
+        super( props )
         this.state = {
             currentComponent: "infoPage",
             showModal: false,
             proceed: false,
             moving: false
         }
-        this.map = new ol.Map({
-            layers: [new ol.layer.Tile({
+        this.map = new ol.Map( {
+            layers: [ new ol.layer.Tile( {
                 title: 'OpenStreetMap',
-                source: new ol.source.OSM()
-            })],
-            view: new ol.View({
+                source: new ol.source.OSM( )
+            } ) ],
+            view: new ol.View( {
                 center: [
                     0, 0
                 ],
                 zoom: 3
-            })
-        })
+            } )
+        } )
     }
-    WFS = new WFSClient(this.props.geoserverUrl)
-    onSubmit = (e) => {
-        e.preventDefault()
-        if (this.form.getValue() && this.xyForm.getValue() && this.fileForm.getValue()) {
-            this.showModal()
+    WFS = new WFSClient( this.props.geoserverUrl )
+    onSubmit = ( e ) => {
+        // e.preventDefault( )
+        if ( this.form.getValue( ) && this.xyForm.getValue( ) && this.fileForm
+            .getValue( ) ) {
+            this.showModal( )
         }
     }
-    saveAll = () => {
+    saveAll = ( ) => {
         const { layer, geometryName, uploadUrl } = this.props
-        const properties = Object.assign({}, this.form.getValue())
-        const geometry = Object.assign({
+        const properties = Object.assign( {}, this.form.getValue( ) )
+        console.log(properties)
+        const geometry = Object.assign( {
             name: geometryName,
             srsName: "EPSG:4326"
-        }, this.xyForm.getValue())
-        this.setState({
+        }, this.xyForm.getValue( ) )
+        this.setState( {
             saving: true
-        })
-        this.WFS.insertFeature(layer, properties, geometry).then(res =>
-            res.text()).then((xml) => {
-                // console.log( xml )
-                const parser = new DOMParser()
-                const xmlDoc = parser.parseFromString(xml, "text/xml")
-                const featureElements = xmlDoc.getElementsByTagNameNS(
-                    'http://www.opengis.net/ogc', 'FeatureId')
-                if (featureElements.length > 0) {
-                    const fid = featureElements[0].getAttribute(
-                        "fid")
-                    const fileFormValue = this.fileForm.getValue()
-                    const data = { file: fileFormValue.base64, file_name: fileFormValue.name, username: this.props.username,is_image:true, feature_id: fid,tags:['geo_collect_'+this.layerName()] }
-                    //TODO: remove static url
-                    fetch(`/apps/cartoview_attachment_manager/${this.layerName()}/file`, {
-                        method: 'POST',
-                        credentials: "same-origin",
-                        headers: new Headers({
-                            "Content-Type": "application/json; charset=UTF-8",
-                            "X-CSRFToken": getCRSFToken()
-                        }),
-                        body: JSON.stringify(data)
-                    }).then((response) => response.json()).then(res => {
+        } )
+        this.WFS.insertFeature( layer, properties, geometry ).then( res =>
+            res.text( ) ).then( ( xml ) => {
+            const parser = new DOMParser( )
+            const xmlDoc = parser.parseFromString( xml, "text/xml" )
+            const featureElements = xmlDoc.getElementsByTagNameNS(
+                'http://www.opengis.net/ogc', 'FeatureId' )
+            if ( featureElements.length > 0 ) {
+                const fid = featureElements[ 0 ].getAttribute(
+                    "fid" )
+                const fileFormValue = this.fileForm.getValue( )
+                const data = {
+                    file: fileFormValue.base64,
+                    file_name: fileFormValue.name,
+                    username: this.props.username,
+                    is_image: true,
+                    feature_id: fid,
+                    tags: [ 'geo_collect_' +
+                        this.layerName( ) ]
+                }
+                //TODO: remove static url
+                fetch(
+                        `/apps/cartoview_attachment_manager/${this.layerName()}/file`, {
+                            method: 'POST',
+                            credentials: "same-origin",
+                            headers: new Headers( {
+                                "Content-Type": "application/json; charset=UTF-8",
+                                "X-CSRFToken": getCRSFToken( )
+                            } ),
+                            body: JSON.stringify( data )
+                        } ).then( ( response ) => response.json( ) )
+                    .then( res => {
                         // history.push( '/' )
-                        if (res.error) {
+                        if ( res.error ) {
                             this.msg.show(
                                 'Error while saving Data please Contact our Support', {
                                     time: 5000,
                                     type: 'success',
                                     icon: <i style={{ color: "#e2372a" }} className="fa fa-times-circle-o fa-lg" aria-hidden="true"></i>
-                                })
+                                } )
                         } else {
-                            this.setState({ saving: false })
+                            this.form.buildForm( )
+                            this.fileForm.reset( )
+                            this.setState( { saving: false } )
                             this.msg.show(
                                 'Your Data Saved successfully', {
                                     time: 5000,
                                     type: 'success',
                                     icon: <i style={{ color: "#4caf50" }} className="fa fa-check-square-o fa-lg" aria-hidden="true"></i>
-                                })
+                                } )
                         }
-
-                    }).catch((error) => {
+                    } ).catch( ( error ) => {
                         this.msg.show(
                             'Error while saving Data please Contact our Support', {
                                 time: 5000,
                                 type: 'success',
                                 icon: <i style={{ color: "#e2372a" }} className="fa fa-times-circle-o fa-lg" aria-hidden="true"></i>
-                            })
-                    })
-                    // fetch(`/apps/cartoview_attachment_manager/${this.layerName()}/comment`, {
-                    //     method: 'POST',
-                    //     credentials: 'include',
-                    //     body: fd
-                    // }).then(res => res.json()).then(res => {
-                    //     // history.push( '/' )
-                    //     this.setState({ saving: false })
-                    //     this.msg.show(
-                    //         'Your Data Saved successfully', {
-                    //             time: 5000,
-                    //             type: 'success',
-                    //             icon: <i style={{ color: "#4caf50" }} className="fa fa-check-square-o fa-lg" aria-hidden="true"></i>
-                    //         })
-                    // }).catch((error) => {
-                    //     this.msg.show(
-                    //         'Error while saving Data please Contact our Support', {
-                    //             time: 5000,
-                    //             type: 'success',
-                    //             icon: <i style={{ color: "#e2372a" }} className="fa fa-times-circle-o fa-lg" aria-hidden="true"></i>
-                    //         })
-                    // })
-                }
-                //ogc:FeatureId
-            }).catch((error) => {
-                this.msg.show(
-                    'Error while saving Data please Contact our Support', {
-                        time: 5000,
-                        type: 'success',
-                        icon: <i style={{ color: "#e2372a" }} className="fa fa-times-circle-o fa-lg" aria-hidden="true"></i>
-                    })
-            })
+                            } )
+                    } )
+            }
+            //ogc:FeatureId
+        } ).catch( ( error ) => {
+            this.msg.show(
+                'Error while saving Data please Contact our Support', {
+                    time: 5000,
+                    type: 'success',
+                    icon: <i style={{ color: "#e2372a" }} className="fa fa-times-circle-o fa-lg" aria-hidden="true"></i>
+                } )
+        } )
     }
-    layerName() {
-        return this.props.layer.split(":").pop()
+    layerName( ) {
+        return this.props.layer.split( ":" ).pop( )
     }
-    getXYForm() {
+    getXYForm( ) {
         const { xyValue } = this.state
-        const xyFormSchema = t.struct({
+        const xyFormSchema = t.struct( {
             x: t.Number,
             y: t.Number
-        })
+        } )
         const options = {
             fields: {
                 x: {
@@ -281,34 +287,33 @@ class GeoCollect extends Component {
             value={xyValue}
             onChange={(xyValue) => this.setState({ xyValue })} />
     }
-    onFeatureMove = (coords) => {
-        const center = ol.proj.transform(coords, 'EPSG:900913',
-            'EPSG:4326')
-        this.setState({
+    onFeatureMove = ( coords ) => {
+        const center = ol.proj.transform( coords, 'EPSG:900913',
+            'EPSG:4326' )
+        this.setState( {
             xyValue: {
-                x: center[0],
-                y: center[1]
+                x: center[ 0 ],
+                y: center[ 1 ]
             },
             moving: true
-        })
+        } )
     }
-    showModal = () => {
-        this.setState({ showModal: !this.state.showModal })
+    showModal = ( ) => {
+        this.setState( { showModal: !this.state.showModal } )
     }
-    onMapReady = (map) => {
-        if (!this.props.EnableGeolocation) {
-            this.onFeatureMove(map.getView().getCenter())
+    onMapReady = ( map ) => {
+        if ( !this.props.EnableGeolocation ) {
+            this.onFeatureMove( map.getView( ).getCenter( ) )
         }
     }
-    changeXY = (xy) => {
-        this.setState({ xyValue: xy })
+    changeXY = ( xy ) => {
+        this.setState( { xyValue: xy } )
     }
-    onYes = () => {
-        this.saveAll()
+    onYes = ( ) => {
+        this.saveAll( )
     }
-    toggleComponent = (component) => {
-        console.log(component)
-        this.setState({ currentComponent: component })
+    toggleComponent = ( component ) => {
+        this.setState( { currentComponent: component } )
     }
     alertOptions = {
         offset: 14,
@@ -317,9 +322,9 @@ class GeoCollect extends Component {
         time: 5000,
         transition: 'scale'
     }
-    render() {
+    render( ) {
         const { formTitle, mapId, attributes, appName, description } =
-            this.props
+        this.props
         const { xyValue, saving, currentComponent } = this.state
         return (
             <div className="row" style={{ paddingTop: 50, paddingBottom: 50 }}>

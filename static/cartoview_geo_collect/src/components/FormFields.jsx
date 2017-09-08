@@ -20,7 +20,7 @@ export default class FormFields extends Component {
     constructor( props ) {
         super( props )
         this.state = {
-            attributes: this.props.config && this.props.currentConfig.layer === this.props.config.layer ? this.props.config.attributes : [ ],
+            attributes: this.props.config && this.props.currentConfig.config.layer === this.props.config.layer ? this.props.config.attributes : [ ],
             geometryName: undefined,
             allAttributes: this.props.attributes,
             showModal: false,
@@ -85,6 +85,7 @@ export default class FormFields extends Component {
         return fieldList
     }
     generateForm = ( attribute ) => {
+        console.log(attribute)
         let fieldList = this.getFieldList( attribute.fieldType ) || this.getFieldList(
             initialTypeMapping[ attribute.dataType ] || "text" )
         const fieldConfig = t.struct( {
