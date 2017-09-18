@@ -1,0 +1,57 @@
+{% extends "app_manager/app_install_base.html" %}
+{% load viewer_helper_tags %}
+{% load bootstrap_tags staticfiles %}
+{% load i18n %}
+{% load static %}
+{% block title %} {{ block.super }} - {% trans "Geoform" %}- {{instance.title}} {% endblock %}
+{% block head %}
+    {% include "geonode/ext_header.html" %}
+    {% include "geonode/app_header.html" %}
+    {{ block.super }}
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/ol3/4.2.0/ol.css" />
+      <link rel="shortcut icon" type="image/png" href="{{ STATIC_URL }}cartoview/img/icon.png" />
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/3.5.2/animate.min.css">
+
+    <style>
+        html {
+            height: 100%;
+            margin: 0px;
+        }
+    </style>
+{% endblock %}
+{% block body %}
+    <div id="page-wrapper">
+        <div class="container-fluid">
+            <div class="row" id="main-ct"></div>
+        </div>
+    </div>
+
+{% endblock %}
+{% block extra_script %}
+
+<script src="{{ STATIC_URL }}cartoview_geo_collect/dist/geoCollect.bundle.js?v={{v}}"></script>
+<script>
+    {% if instance %}
+        var instanceId= {{ instance.id }}
+        const urls={
+            mapJsonUrl: "{% url 'map_json' mapid=instance.map.id %}",
+            proxy: "{{ PROXY_URL }}",
+            appInstance: "{% url 'api_dispatch_detail' api_name='api' resource_name='appinstances' pk=instance.id %}",
+            geoserverUrl : "{{ GEOSERVER_BASE_URL }}",
+            save:'{% url 'cartoview_geo_collect.edit' instance_id=instance.id %}',
+            static: "{{ STATIC_URL }}",
+            media: "{{ MEDIA_URL }}",
+            rest: "{% url 'app_manager_base_url' %}rest/app_manager/",
+            geonodeRest: "{% url 'api_api_top_level' 'api' %}",
+            attachmentUploadUrl:function(layerName){
+                return '/apps/cartoview_attachment_manager/'+layerName+'/file'
+        }
+
+        }
+    {% endif %}
+    var username="{{instance.owner.username}}"
+    var viewer=new GeoCollectViewer('main-ct',username,urls,instanceId);
+    viewer.view()
+</script>
+{% endblock %}
+

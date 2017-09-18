@@ -1,12 +1,12 @@
 var webpack = require('webpack');
 var path = require('path');
-var BUILD_DIR = path.resolve(__dirname, 'dist');
-var APP_DIR = path.resolve(__dirname, 'src');
+var BUILD_DIR = path.resolve(__dirname, 'dist')
+var APP_DIR = path.resolve(__dirname, 'src')
 var plugins = [];
-var filename = '[name].bundle.js';
+var filename = '[name].bundle.js'
 module.exports = {
 	entry: {
-		geoCollect: path.join(APP_DIR, 'GeoCollect.jsx'),
+		geoCollect: path.join(APP_DIR, 'viewRender.jsx'),
 		config: path.join(APP_DIR, 'AppRender.jsx'),
 	},
 	output: {

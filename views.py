@@ -14,7 +14,7 @@ from PIL import Image
 
 from . import APP_NAME, __version__
 
-VIEW_MAP_TPL = "%s/geoform.html" % APP_NAME
+VIEW_MAP_TPL = "%s/geoCollect.html" % APP_NAME
 
 
 @login_required
