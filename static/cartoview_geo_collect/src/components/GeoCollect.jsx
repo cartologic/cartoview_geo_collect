@@ -188,6 +188,7 @@ class GeoCollect extends Component {
                             <div style={{ textAlign: '-webkit-center' }} className="col-xs-4 col-sm-2 col-md-2 vcenter">
                                 <Img src={[
                                         config.config.logo.base64,
+                                        config.map.thumbnail_url,
                                         urls.appLogo
                                     ]}
                                     style={{ height: 60 }}

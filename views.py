@@ -50,15 +50,15 @@ def save(request, instance_id=None, app_name=APP_NAME):
         'logo', None)
     if base64_image:
         logo = base64_image.get('base64', None)
-        encoded_image = generate_thumbnails(base64_image)
+        encoded_image = generate_thumbnails(logo)
         config['logo']['base64'] = encoded_image
     map_id = data.get('map', None)
     title = data.get('title', "")
     access = data.get('access', None)
-    config.update(access=access)
+    keywords = data.get('keywords', [])
+    config.update(access=access, keywords=keywords)
     config = json.dumps(data.get('config', None))
     abstract = data.get('abstract', "")
-    keywords = data.get('keywords', [])
 
     if instance_id is None:
         instance_obj = AppInstance()
@@ -85,8 +85,10 @@ def save(request, instance_id=None, app_name=APP_NAME):
     # access limited to specific users
     users_permissions = {'{}'.format(request.user): owner_permissions}
     for user in access:
-        if user != request.user.username:
-            users_permissions.update({user: ['view_resourcebase', ]})
+        if user.get('value', None) != request.user.username:
+            users_permissions.update(
+                {user.get('value', None): ['view_resourcebase', ]})
+    print(users_permissions)
     permessions = {
         'users': users_permissions
     }
@@ -95,10 +97,10 @@ def save(request, instance_id=None, app_name=APP_NAME):
     instance_obj.set_permissions(permessions)
 
     # update the instance keywords
-    if hasattr(instance_obj, 'keywords'):
+    if hasattr(instance_obj, 'keywords') and keywords:
         for k in keywords:
-            if k not in instance_obj.keyword_list():
-                instance_obj.keywords.add(k)
+            if k.get('value', None) not in instance_obj.keyword_list():
+                instance_obj.keywords.add(k.get('value', None))
 
     res_json.update(dict(success=True, id=instance_obj.id))
     return HttpResponse(json.dumps(res_json), content_type="application/json")

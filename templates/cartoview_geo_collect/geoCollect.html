@@ -46,8 +46,7 @@
             attachmentUploadUrl:function(layerName){
                 return '/apps/cartoview_attachment_manager/'+layerName+'/file'
         },
-            appLogo:'{% static 'cartoview_geo_collect/logo.png' %}'
-
+        appLogo:'{% static 'cartoview_geo_collect/logo.png' %}',
         }
     {% endif %}
     var username="{{instance.owner.username}}"

@@ -1,16 +1,40 @@
-import React, { Component } from 'react';
+import React, { Component } from 'react'
+import {
+    getAccessOptions,
+    getAccessTemplate,
+    getKeywordsOptions,
+    getKeywordsTemplate
+} from './AutoCompleteInput'
 
-import KeywordsInput from './KeywordsInput.jsx'
-import t from 'tcomb-form';
-const Form = t.form.Form;
+import t from 'tcomb-form'
+
+const Form = t.form.Form
+const selectAccessItem = t.struct( {
+    value: t.String,
+    label: t.String,
+    email: t.String
+} )
+const selectKeywordItem = t.struct( {
+    value: t.String,
+    label: t.String
+} )
+
 const options = {
     fields: {
         title: {
             label: "App Title"
         },
         access: {
-            help: 'Use <ctrl> or <cmd> key to choose multiple users',
-            factory: t.form.Select
+            factory: t.form.Textbox,
+            template: getAccessTemplate( {
+                loadOptions: getAccessOptions
+            } )
+        },
+        keywords: {
+            factory: t.form.Textbox,
+            template: getKeywordsTemplate( {
+                loadOptions: getKeywordsOptions
+            } )
         }
     }
 }
@@ -27,47 +51,32 @@ export default class General extends Component {
                     "No Abstract Provided",
                 access: this.props.state.config.access ? this.props.state
                     .config.access : this.props.config ? this.props.config
-                    .access : 'private'
+                    .access : null,
+                keywords: this.props.state.config.access ? this.props.state
+                    .config.keywords : this.props.config ? this.props.config
+                    .keywords : null,
+
             },
-            users: {}
         }
     }
-    componentWillMount( ) {
-        fetch( "/api/profiles/" ).then( ( response ) => response.json( ) )
-            .then( ( data ) => {
-                let users = {}
-                data.objects.forEach( user => {
-                    users[ user.username ] =
-                        `${user.username} , email: <${user.email!==""? user.email: "no Email"}> `
-                } )
-                this.setState( { users } )
-            } )
-    }
     save( ) {
-        var basicConfig = this.refs.form.getValue( );
+        var basicConfig = this.form.getValue( )
         if ( basicConfig ) {
-            console.log( basicConfig )
             let properConfig = {
                 title: basicConfig.title,
                 abstract: basicConfig.abstract,
                 access: basicConfig.access,
-                keywords: this.keywords
+                keywords: basicConfig.keywords
             }
             this.props.onComplete( properConfig )
         }
     }
-    Keywords = [ ]
-    updateKeywords( keywords ) {
-        this.keywords = keywords.map( ( keyword ) => {
-            return keyword.name
-        } )
-    }
     render( ) {
-        let access = t.enums( this.state.users )
         let mapConfig = t.struct( {
             title: t.String,
             abstract: t.String,
-            access: t.list( access )
+            access: t.list( selectAccessItem ),
+            keywords: t.list( t.maybe( selectKeywordItem ) )
         } )
         return (
             <div className="row">
@@ -99,19 +108,12 @@ export default class General extends Component {
 				<hr></hr>
 
 				<Form
-					ref="form"
+					ref={(form)=>this.form=form}
 					value={this.state.defaultConfig}
 					type={mapConfig}
+                    onChange={this.onChange}
 					options={options}/>
-
-				<KeywordsInput
-					updateKeywords={( keywords ) => {
-					this.updateKeywords( keywords )
-				}}
-					keywords={this.props.state.config.keywords
-					? this.props.state.config.keywords
-					: typeof(keywords)==="undefined" ? [] : keywords}/>
-				<small>{"use <enter> key to seperate  keywords"}</small>
+                
 			</div>
         )
     }

@@ -24,7 +24,8 @@ class GeoCollectViewer {
             this.config = {
                 config: res.config,
                 title: res.title,
-                abstract: res.abstract
+                abstract: res.abstract,
+                map:res.map
             }
             render(
                 <GeoCollect config={this.config} username={this.username} urls={this.urls} instanceId={this.instanceId}/>,
