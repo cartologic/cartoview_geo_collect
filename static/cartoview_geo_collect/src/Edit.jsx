@@ -10,6 +10,7 @@ import LayerSelector from "./components/LayerSelector.jsx"
 import NavigationTools from './components/NavigationTools.jsx'
 import Navigator from './components/Navigator.jsx'
 import ResourceSelector from './components/ResourceSelector.jsx'
+
 export default class Edit extends Component {
     constructor( props ) {
         super( props )
@@ -64,7 +65,7 @@ export default class Edit extends Component {
                         this.setState( { attributes: attributes } )
                     },
                     config: this.props.config.instance ? this.props.config
-                        .instance.config : null,
+                        .instance.config : this.state.config.config,
                     urls: this.props.config.urls,
                     onComplete: ( listConfig ) => {
                         let { step } = this.state
@@ -86,7 +87,10 @@ export default class Edit extends Component {
                     map: this.state.selectedResource,
                     attributes: this.state.attributes,
                     config: this.props.config.instance ? this.props.config
-                        .instance.config : null,
+                        .instance.config : typeof ( this.state.config.config ) !==
+                        "undefined" && typeof ( this.state.config.config
+                            .attributes ) !== "undefined" ? this.state
+                        .config.config : null,
                     currentConfig: this.state.config,
                     urls: this.props.config.urls,
                     onComplete: ( config ) => {
@@ -151,7 +155,8 @@ export default class Edit extends Component {
                     config: this.props.config.instance ? this.props.config
                         .instance.config : null,
                     id: this.props.config.instance ? this.props.config
-                        .instance.id : this.state.id ? this.state.id : undefined,
+                        .instance.id : this.state.id ? this.state.id :
+                        undefined,
                     urls: this.props.config.urls,
                     success: this.state.success,
                     onComplete: ( basicConfig ) => {

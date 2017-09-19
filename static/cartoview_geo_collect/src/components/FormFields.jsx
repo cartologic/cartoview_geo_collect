@@ -85,7 +85,6 @@ export default class FormFields extends Component {
         return fieldList
     }
     generateForm = ( attribute ) => {
-        console.log(attribute)
         let fieldList = this.getFieldList( attribute.fieldType ) || this.getFieldList(
             initialTypeMapping[ attribute.dataType ] || "text" )
         const fieldConfig = t.struct( {
@@ -94,9 +93,9 @@ export default class FormFields extends Component {
             label: t.String,
             id: t.Number,
             placeholder: t.String,
-            helpText: t.String,
+            helpText: t.maybe(t.String),
             required: t.Boolean,
-            defaultValue: t.String,
+            defaultValue: t.maybe(t.String),
             fieldType: fieldList,
             options: t.list( Options )
         } )

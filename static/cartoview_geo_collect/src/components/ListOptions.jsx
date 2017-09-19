@@ -10,24 +10,21 @@ export default class ListOptions extends Component {
         this.state = {
             layers: [ ],
             loading: true,
-            selectedLayer: this.props.config ? this.props.config.layer : null,
-            selectedTitleAttribute: this.props.config ? this.props.config
-                .titleAttribute : null,
-            selectedSubtitleAttribute: this.props.config ? this.props.config
-                .subtitleAttribute : null,
-            pagination: this.props.config ? this.props.config.pagination : null,
+            selectedLayer: this.props.config ? this.props.config.layer :
+                null,
             attributes: [ ],
-            searchOptions: [ ],
-			filters: this.props.config ? this.props.config.filters:[ ],
-			messages:null
+            messages: null
         }
     }
     attributesOption = ( ) => {
         let options = [ ]
         this.state.attributes.forEach( ( attribute ) => {
             if ( attribute.attribute_type.indexOf( "gml:" ) == -1 ) {
-                options.push( { value: attribute.attribute, label: attribute
-                        .attribute } )
+                options.push( {
+                    value: attribute.attribute,
+                    label: attribute
+                        .attribute
+                } )
             }
         } )
         this.setState( { searchOptions: options } )
@@ -39,30 +36,6 @@ export default class ListOptions extends Component {
             }, this.loadAttributes( ) )
         }
     }
-    selectTitleAttribute( ) {
-        if ( this.refs.selectedTitleAttribute.value !== "" ) {
-            this.setState( {
-                selectedTitleAttribute: this.refs.selectedTitleAttribute
-                    .value
-            } )
-        }
-    }
-    selectSubtitleAttribute( ) {
-        if ( this.refs.selectedSubtitleAttribute.value !== "" ) {
-            this.setState( {
-                selectedSubtitleAttribute: this.refs.selectedSubtitleAttribute
-                    .value
-            } )
-        }
-    }
-    selectPagination( ) {
-        if ( this.refs.selectedPagination.value !== "" ) {
-            console.log( this.refs.selectedPagination.value )
-            this.setState( {
-                pagination: this.refs.selectedPagination.value
-            } )
-        }
-    }
     loadAttributes( ) {
         let typename = this.refs.selectedLayer ? this.refs.selectedLayer.value :
             this.state.selectedLayer
@@ -70,8 +43,10 @@ export default class ListOptions extends Component {
             fetch( this.props.urls.layerAttributes + "?layer__typename=" +
                 typename ).then( ( response ) => response.json( ) ).then(
                 ( data ) => {
-                    this.setState( { attributes: data.objects }, ( ) => { this
-                            .attributesOption( ) } )
+                    this.setState( { attributes: data.objects }, ( ) => {
+                        this
+                            .attributesOption( )
+                    } )
                 } ).catch( ( error ) => {
                 console.error( error )
             } )
@@ -90,15 +65,10 @@ export default class ListOptions extends Component {
         } )
     }
     handleSelectChange = ( value ) => {
-        this.setState( { filters: value ,messages:null} )
+        this.setState( { filters: value, messages: null } )
     }
     handleSubmit( ) {
-		if(this.state.filters.length>0){
-			this.refs.submitButton.click( )
-		}else{
-			this.setState({messages:"Please Select Search Attribute"})
-		}
-        
+        this.submitButton.click( )
     }
     componentDidMount( ) {
         this.loadLayers( )
@@ -114,8 +84,8 @@ export default class ListOptions extends Component {
                 layer: this.state.selectedLayer,
                 titleAttribute: this.state.selectedTitleAttribute,
                 subtitleAttribute: this.state.selectedSubtitleAttribute,
-				pagination: this.state.pagination,
-				filters:this.state.filters
+                pagination: this.state.pagination,
+                filters: this.state.filters
             }
         } )
     }
@@ -149,7 +119,7 @@ export default class ListOptions extends Component {
 					marginTop: "3%"
 				}}>
 					<div className="col-xs-5 col-md-4">
-						<h4>{'Customize List'}</h4>
+						<h4>{'Select Layer'}</h4>
 					</div>
 				</div>
 				<hr></hr>
@@ -236,7 +206,7 @@ export default class ListOptions extends Component {
 						style={{
 							display: 'none'
 						}}
-						ref="submitButton"
+						ref={(button)=>this.submitButton=button}
 						type="submit"
 						value="submit"
 						className="btn btn-primary">Save</button>

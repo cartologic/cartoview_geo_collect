@@ -45,7 +45,8 @@
             geonodeRest: "{% url 'api_api_top_level' 'api' %}",
             attachmentUploadUrl:function(layerName){
                 return '/apps/cartoview_attachment_manager/'+layerName+'/file'
-        }
+        },
+            appLogo:'{% static 'cartoview_geo_collect/logo.png' %}'
 
         }
     {% endif %}

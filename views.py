@@ -47,9 +47,11 @@ def save(request, instance_id=None, app_name=APP_NAME):
     data = json.loads(request.body)
     config = data.get('config', None)
     base64_image = config.get(
-        'logo', None).get('base64', None)
-    encoded_image = generate_thumbnails(base64_image)
-    config['logo']['base64'] = encoded_image
+        'logo', None)
+    if base64_image:
+        logo = base64_image.get('base64', None)
+        encoded_image = generate_thumbnails(base64_image)
+        config['logo']['base64'] = encoded_image
     map_id = data.get('map', None)
     title = data.get('title', "")
     access = data.get('access', None)

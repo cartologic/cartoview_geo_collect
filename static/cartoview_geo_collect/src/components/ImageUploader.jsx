@@ -34,7 +34,7 @@ export default class ImageUploader extends React.Component {
                         <h4>{'Logo'}</h4>
                     </div>
                     <div className="col-xs-7 col-md-8">
-                        {file && <button
+                        <button
                             style={{
                                 display: "inline-block",
                                 margin: "0px 3px 0px 3px"
@@ -42,17 +42,7 @@ export default class ImageUploader extends React.Component {
                             className="btn btn-primary btn-sm pull-right"
                             onClick={this.save}>{"next "}
                             <i className="fa fa-arrow-right"></i>
-                        </button>}
-                        {!file && <button
-                            style={{
-                                display: "inline-block",
-                                margin: "0px 3px 0px 3px"
-                            }}
-                            className="btn btn-primary btn-sm pull-right disabled"
-                            onClick={this.save}>{"next "}
-                            <i className="fa fa-arrow-right"></i>
-                        </button>}
-
+                        </button>
                         <button
                             style={{
                                 display: "inline-block",

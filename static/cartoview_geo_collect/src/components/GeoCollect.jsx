@@ -6,6 +6,7 @@ import AlertContainer from 'react-alert'
 import AttrsForm from './AttrsForm'
 import DetailsPage from './DetailsPage'
 import FileForm from './FileForm'
+import Img from 'react-image'
 import LocationForm from './LocationForm'
 import PropTypes from 'prop-types'
 import SavingPanel from './SavingPanel'
@@ -53,7 +54,7 @@ class GeoCollect extends Component {
         }
     }
     saveAll = ( ) => {
-        this.setState({currentComponent:"savingPanel"})
+        this.setState( { currentComponent: "savingPanel" } )
         const { config, username, urls } = this.props
         const { attrsValue, file, xyValue } = this.state
         const { geometryName, layer } = config.config
@@ -185,7 +186,12 @@ class GeoCollect extends Component {
                     <div>
                         <div className="row collector-title">
                             <div style={{ textAlign: '-webkit-center' }} className="col-xs-4 col-sm-2 col-md-2 vcenter">
-                                <img style={{ height: 60 }} className="img-responsive img-rounded" src={config.config.logo.base64} />
+                                <Img src={[
+                                        config.config.logo.base64,
+                                        urls.appLogo
+                                    ]}
+                                    style={{ height: 60 }}
+                                    className="img-responsive img-rounded"/>
                             </div>
                             <div className="col-xs-8 col-sm-9 col-md-9 vcenter">
                                 <span className="h3"><b>{config.title || 'Add'}</b></span>
