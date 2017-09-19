@@ -31,7 +31,7 @@
   //TODO:Plan to Remove this section
   var appConfig = {{ instance.config|escape|safe }}
   console.log(appConfig)
-  if(appConfig.access && appConfig.access.length>0){
+  if(appConfig.access && Array.isArray(appConfig.access) && appConfig.access.length>0){
     if(typeof(appConfig.access[0])==="string"){
         var newAccess=[]
         appConfig.access.forEach(function(access) {
@@ -41,7 +41,7 @@
     }
   }
   var keywords = {{instance.keyword_list|jsonify}}
-  if(keywords && keywords.length>0){
+  if(keywords && Array.isArray(keywords) && keywords.length>0){
     if(typeof(keywords[0])==="string"){
         var newKeywords=[]
         keywords.forEach(function(keyword) {
