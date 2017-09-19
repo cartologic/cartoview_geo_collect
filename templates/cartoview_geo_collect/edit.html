@@ -30,7 +30,6 @@
   // the following section to fix config with old versions
   //TODO:Plan to Remove this section
   var appConfig = {{ instance.config|escape|safe }}
-  console.log(appConfig)
   if(appConfig.access && Array.isArray(appConfig.access) && appConfig.access.length>0){
     if(typeof(appConfig.access[0])==="string"){
         var newAccess=[]

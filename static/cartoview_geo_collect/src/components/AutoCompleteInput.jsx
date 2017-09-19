@@ -1,8 +1,10 @@
 import { GravatarOption, GravatarValue } from './GavatarOption'
-import Select,{ AsyncCreatable } from 'react-select'
+import Select, { AsyncCreatable } from 'react-select'
 
 import React from 'react'
 
+let users = null
+let keywords = null
 export const getAccessTemplate = ( options ) => {
     function renderInput( locals ) {
         return <div style={{paddingTop:5,paddingBottom:5}} className={locals.hasError?"has-error":""}>
@@ -44,41 +46,57 @@ export const getKeywordsTemplate = ( options ) => {
 
     return renderInput
 }
-export const  getAccessOptions = ( input, callback ) => {
-    fetch( "/api/profiles/" ).then( ( response ) => response.json( ) )
-        .then( ( data ) => {
-            let users = [ ]
-            data.objects.forEach( user => {
-                users.push( {
-                    label: user.username,
-                    value: user
-                        .username,
-                    email: user.email
+export const getAccessOptions = ( input, callback ) => {
+    if ( !users ) {
+        fetch( "/api/profiles/" ).then( ( response ) => response.json( ) )
+            .then( ( data ) => {
+                users = [ ]
+                data.objects.forEach( user => {
+                    users.push( {
+                        label: user.username,
+                        value: user
+                            .username,
+                        email: user.email
+                    } )
                 } )
-            } )
-            callback( null, {
-                options: users,
-                complete: true
-            } )
+                callback( null, {
+                    options: users,
+                    complete: true
+                } )
 
+            } )
+    } else {
+        callback( null, {
+            options: users,
+            complete: true
         } )
+    }
+
 
 }
-export const  getKeywordsOptions = ( input, callback ) => {
-    fetch( "/api/keywords" ).then( ( response ) => response.json( ) )
-        .then( ( data ) => {
-            let keywords = [ ]
-            data.objects.forEach( keyword => {
-                keywords.push( {
-                    label: keyword.name,
-                    value: keyword.name,
+export const getKeywordsOptions = ( input, callback ) => {
+    if ( !keywords ) {
+        fetch( "/api/keywords" ).then( ( response ) => response.json( ) )
+            .then( ( data ) => {
+                keywords = [ ]
+                data.objects.forEach( keyword => {
+                    keywords.push( {
+                        label: keyword.name,
+                        value: keyword.name,
+                    } )
                 } )
-            } )
-            callback( null, {
-                options: keywords,
-                complete: true
-            } )
+                callback( null, {
+                    options: keywords,
+                    complete: true
+                } )
 
+            } )
+    } else {
+        callback( null, {
+            options: keywords,
+            complete: true
         } )
+    }
+
 
 }
