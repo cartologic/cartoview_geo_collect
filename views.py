@@ -6,23 +6,11 @@ import tempfile
 from base64 import b64decode, b64encode
 
 from cartoview.app_manager.models import App, AppInstance
-from cartoview.app_manager.views import _resolve_appinstance
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import HttpResponse, render
-from geonode.maps.views import _PERMISSION_MSG_VIEW
+from cartoview.app_manager.views import StandardAppViews
+from django.shortcuts import HttpResponse
 from PIL import Image
 
-from . import APP_NAME, __version__
-
-VIEW_MAP_TPL = "%s/geoCollect.html" % APP_NAME
-
-
-@login_required
-def collect_data(request, instance_id):
-    context = dict(v=__version__)
-    return view_app(request, instance_id,
-                    template=VIEW_MAP_TPL,
-                    context=context)
+from . import APP_NAME
 
 
 def generate_thumbnails(base64_image, size=(250, 250)):
@@ -42,101 +30,74 @@ def generate_thumbnails(base64_image, size=(250, 250)):
     return format + ';base64,' + encoded_image
 
 
-def save(request, instance_id=None, app_name=APP_NAME):
-    res_json = dict(success=False)
-    data = json.loads(request.body)
-    config = data.get('config', None)
-    base64_image = config.get(
-        'logo', None)
-    if base64_image:
-        logo = base64_image.get('base64', None)
-        encoded_image = generate_thumbnails(logo)
-        config['logo']['base64'] = encoded_image
-    map_id = data.get('map', None)
-    title = data.get('title', "")
-    access = data.get('access', None)
-    keywords = data.get('keywords', [])
-    config.update(access=access, keywords=keywords)
-    config = json.dumps(data.get('config', None))
-    abstract = data.get('abstract', "")
+class Geoobservation(StandardAppViews):
+    def save(self, request, instance_id=None):
+        res_json = dict(success=False)
+        data = json.loads(request.body)
+        config = data.get('config', None)
+        base64_image = config.get(
+            'logo', None)
+        if base64_image:
+            logo = base64_image.get('base64', None)
+            encoded_image = generate_thumbnails(logo)
+            config['logo']['base64'] = encoded_image
+        map_id = data.get('map', None)
+        title = data.get('title', "")
+        access = data.get('access', None)
+        keywords = data.get('keywords', [])
+        config.update(access=access, keywords=keywords)
+        config = json.dumps(data.get('config', None))
+        abstract = data.get('abstract', "")
 
-    if instance_id is None:
-        instance_obj = AppInstance()
-        instance_obj.app = App.objects.get(name=app_name)
-        instance_obj.owner = request.user
-    else:
-        instance_obj = AppInstance.objects.get(pk=instance_id)
+        if instance_id is None:
+            instance_obj = AppInstance()
+            instance_obj.app = App.objects.get(name=self.app_name)
+            instance_obj.owner = request.user
+        else:
+            instance_obj = AppInstance.objects.get(pk=instance_id)
 
-    instance_obj.title = title
-    instance_obj.config = config
-    instance_obj.abstract = abstract
-    instance_obj.map_id = map_id
-    instance_obj.save()
+        instance_obj.title = title
+        instance_obj.config = config
+        instance_obj.abstract = abstract
+        instance_obj.map_id = map_id
+        instance_obj.save()
 
-    owner_permissions = [
-        'view_resourcebase',
-        'download_resourcebase',
-        'change_resourcebase_metadata',
-        'change_resourcebase',
-        'delete_resourcebase',
-        'change_resourcebase_permissions',
-        'publish_resourcebase',
-    ]
-    # access limited to specific users
-    users_permissions = {'{}'.format(request.user): owner_permissions}
-    for user in access:
-        if user.get('value', None) != request.user.username:
-            users_permissions.update(
-                {user.get('value', None): ['view_resourcebase', ]})
-    print(users_permissions)
-    permessions = {
-        'users': users_permissions
-    }
-    # set permissions so that no one can view this appinstance other than
-    #  the user
-    instance_obj.set_permissions(permessions)
+        owner_permissions = [
+            'view_resourcebase',
+            'download_resourcebase',
+            'change_resourcebase_metadata',
+            'change_resourcebase',
+            'delete_resourcebase',
+            'change_resourcebase_permissions',
+            'publish_resourcebase',
+        ]
+        # access limited to specific users
+        users_permissions = {'{}'.format(request.user): owner_permissions}
+        for user in access:
+            if isinstance(user, dict) and \
+                    user.get('value', None) != request.user.username:
+                users_permissions.update(
+                    {user.get('value', None): ['view_resourcebase', ]})
+        permessions = {
+            'users': users_permissions
+        }
+        # set permissions so that no one can view this appinstance other than
+        #  the user
+        instance_obj.set_permissions(permessions)
 
-    # update the instance keywords
-    if hasattr(instance_obj, 'keywords') and keywords:
-        for k in keywords:
-            if k.get('value', None) not in instance_obj.keyword_list():
-                instance_obj.keywords.add(k.get('value', None))
+        # update the instance keywords
+        if hasattr(instance_obj, 'keywords') and keywords:
+            for k in keywords:
+                if k.get('value', None) not in instance_obj.keyword_list():
+                    instance_obj.keywords.add(k.get('value', None))
 
-    res_json.update(dict(success=True, id=instance_obj.id))
-    return HttpResponse(json.dumps(res_json), content_type="application/json")
+        res_json.update(dict(success=True, id=instance_obj.id))
+        return HttpResponse(json.dumps(res_json),
+                            content_type="application/json")
 
-
-@login_required
-def new(
-        request,
-        template="%s/new.html" %
-        APP_NAME,
-        app_name=APP_NAME,
-        context={}):
-    if request.method == 'POST':
-        return save(request, app_name=app_name)
-    return render(request, template, context)
+    def __init__(self, app_name):
+        super(Geoobservation, self).__init__(app_name)
+        self.view_template = "%s/geoCollect.html" % app_name
 
 
-@login_required
-def edit(request, instance_id, template="%s/edit.html" % APP_NAME, context={}):
-    if request.method == 'POST':
-        return save(request, instance_id)
-    instance = AppInstance.objects.get(pk=instance_id)
-    context.update(instance=instance)
-    return render(request, template, context)
-
-
-def view_app(
-        request,
-        instance_id,
-        template="%s/view.html" %
-        APP_NAME,
-        context={}):
-    instance = _resolve_appinstance(
-        request, instance_id, 'base.view_resourcebase', _PERMISSION_MSG_VIEW)
-    context.update({
-        "map_config": instance.map.viewer_json(request.user, None),
-        "instance": instance
-    })
-    return render(request, template, context)
+geo_collect = Geoobservation(APP_NAME)
