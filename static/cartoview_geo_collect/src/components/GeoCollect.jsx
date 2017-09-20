@@ -57,7 +57,10 @@ class GeoCollect extends Component {
         this.setState( { currentComponent: "savingPanel" } )
         const { config, username, urls } = this.props
         const { attrsValue, file, xyValue } = this.state
-        const { geometryName, layer } = config.config
+        let { geometryName, layer } = config.config
+        if(typeof(geometryName)==="undefined"){
+            geometryName="the_geom"
+        }
         const properties = { ...attrsValue }
         const geometry = {
             name: geometryName,
