@@ -190,7 +190,7 @@ class GeoCollect extends Component {
                         <div className="row collector-title">
                             <div style={{ textAlign: '-webkit-center' }} className="col-xs-4 col-sm-2 col-md-2 vcenter">
                                 <Img src={[
-                                        config.config.logo.base64,
+                                    config.config.logo ? config.config.logo : "",
                                         config.map.thumbnail_url,
                                         urls.appLogo
                                     ]}
