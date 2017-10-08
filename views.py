@@ -7,8 +7,10 @@ from base64 import b64decode, b64encode
 
 from cartoview.app_manager.models import App, AppInstance
 from cartoview.app_manager.views import StandardAppViews
+from django.conf.urls import include, patterns, url
 from django.shortcuts import HttpResponse
 from PIL import Image
+from tastypie.api import Api
 
 from . import APP_NAME
 
@@ -30,7 +32,7 @@ def generate_thumbnails(base64_image, size=(250, 250)):
     return format + ';base64,' + encoded_image
 
 
-class Geoobservation(StandardAppViews):
+class GeoCollect(StandardAppViews):
     def save(self, request, instance_id=None):
         res_json = dict(success=False)
         data = json.loads(request.body)
@@ -96,8 +98,23 @@ class Geoobservation(StandardAppViews):
                             content_type="application/json")
 
     def __init__(self, app_name):
-        super(Geoobservation, self).__init__(app_name)
+        super(GeoCollect, self).__init__(app_name)
         self.view_template = "%s/geoCollect.html" % app_name
 
+    def get_url_patterns(self):
+        from .rest import CollectorHistoryResource
+        v1_api = Api(api_name='collector_api')
+        v1_api.register(CollectorHistoryResource())
+        return patterns('',
+                        url(r'^new/$', self.new,
+                            name='%s.new' % self.app_name),
+                        url(r'^(?P<instance_id>\d+)/edit/$',
+                            self.edit, name='%s.edit' % self.app_name),
+                        url(r'^(?P<instance_id>\d+)/view/$',
+                            self.view_app,
+                            name='%s.view' % self.app_name),
+                        url(r'^api/', include(v1_api.urls))
+                        )
 
-geo_collect = Geoobservation(APP_NAME)
+
+geo_collect = GeoCollect(APP_NAME)

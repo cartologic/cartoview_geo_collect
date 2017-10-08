@@ -54,12 +54,13 @@ class GeoCollect extends Component {
         }
     }
     saveAll = ( ) => {
+        let that = this;
         this.setState( { currentComponent: "savingPanel" } )
         const { config, username, urls } = this.props
         const { attrsValue, file, xyValue } = this.state
         let { geometryName, layer } = config.config
-        if(typeof(geometryName)==="undefined"){
-            geometryName="the_geom"
+        if ( typeof ( geometryName ) === "undefined" ) {
+            geometryName = "the_geom"
         }
         const properties = { ...attrsValue }
         const geometry = {
@@ -97,27 +98,33 @@ class GeoCollect extends Component {
                         body: JSON.stringify( data )
                     } ).then( ( response ) => response.json( ) )
                     .then( res => {
-                        if ( res.error ) {
-                            this.msg.show(
-                                'Error while saving Data please Contact our Support', {
-                                    time: 5000,
-                                    type: 'success',
-                                    icon: <i style={{ color: "#e2372a" }} className="fa fa-times-circle-o fa-lg" aria-hidden="true"></i>
-                                } )
-                        } else {
-                            this.setState( { saving: false } )
-                            this.msg.show(
+                        fetch( urls.historyListCreate, {
+                            method: 'POST',
+                            credentials: "same-origin",
+                            headers: new Headers( {
+                                "Content-Type": "application/json; charset=UTF-8",
+                                "X-CSRFToken": getCRSFToken( )
+                            } ),
+                            body: JSON.stringify( {
+                                layer: this
+                                    .props.config
+                                    .config.layer,
+                                data: properties,
+                            } )
+                        } ).then( apiRes => {
+                            that.setState( { saving: false } )
+                            that.msg.show(
                                 'Your Data Saved successfully', {
                                     time: 5000,
                                     type: 'success',
                                     icon: <i style={{ color: "#4caf50" }} className="fa fa-check-square-o fa-lg" aria-hidden="true"></i>
                                 } )
-                        }
+                        } )
                     } ).catch( ( error ) => {
                         this.msg.show(
                             'Error while saving Data please Contact our Support', {
                                 time: 5000,
-                                type: 'success',
+                                type: 'error',
                                 icon: <i style={{ color: "#e2372a" }} className="fa fa-times-circle-o fa-lg" aria-hidden="true"></i>
                             } )
                     } )
@@ -187,6 +194,11 @@ class GeoCollect extends Component {
                 <div className="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                     <AlertContainer ref={a => this.msg = a} {...this.alertOptions} />
                     <div>
+                        <div className="container">
+                        <a href="../"><i className="fa fa-question-circle fa-2x pull-right" aria-hidden="true"></i></a>
+                        <a href="/"><i className="fa fa-home fa-2x pull-right" aria-hidden="true"></i></a>
+                        
+                        </div>
                         <div className="row collector-title">
                             <div style={{ textAlign: '-webkit-center' }} className="col-xs-4 col-sm-2 col-md-2 vcenter">
                                 <Img src={[
@@ -201,11 +213,13 @@ class GeoCollect extends Component {
                                 <span className="h3"><b>{config.title || 'Add'}</b></span>
                             </div>
                         </div>
+                        <div className="container">
                         {currentComponent==="savingPanel" && <SavingPanel urls={urls} saving={saving}/>}
                         {currentComponent==="detailsPage" && <DetailsPage saveAll={this.saveAll} setCurrentComponent={this.setCurrentComponent} file={file} attrsValue={attrsValue} />}
                         {currentComponent==="attrsForm" && <AttrsForm setCurrentComponent={this.setCurrentComponent} onSave={this.setAttrsValue} key="attrsForm" attributes={config.config.attributes} ref={f => this.form = f} />}
                         {currentComponent==="fileForm" && <FileForm file={file} setCurrentComponent={this.setCurrentComponent} message={this.state.message} onSave={this.setFileFormValue} ref={f => this.fileForm = f} key="fileform" />}
                         {currentComponent==="locationForm" && <LocationForm urls={urls} onMapReady={this.onMapReady} map={this.map} changeXY={this.changeXY} onFeatureMove={this.onFeatureMove} xyValue={xyValue} setCurrentComponent={this.setCurrentComponent} ref={f => this.locationForm = f} key="locationForm" />}
+                        </div>
                     </div>
                 </div>
             </div>

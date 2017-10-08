@@ -1,10 +1,10 @@
-import React, { Component } from 'react';
+import React, { Component } from 'react'
 
-import PropTypes from 'prop-types';
-import ReactDOM from 'react-dom';
-import t from 'tcomb-form';
+import PropTypes from 'prop-types'
+import ReactDOM from 'react-dom'
+import t from 'tcomb-form'
 
-const Form = t.form.Form;
+const Form = t.form.Form
 const options = {
     fields: {
         name: {
@@ -23,15 +23,15 @@ const options = {
             type: 'hidden'
         }
     }
-};
+}
 export default class FieldConfigModal extends Component {
     constructor( props ) {
         super( props )
     }
     componentDidMount( ) {
-        $( ReactDOM.findDOMNode( this ) ).modal( 'show' );
+        $( ReactDOM.findDOMNode( this ) ).modal( 'show' )
         $( ReactDOM.findDOMNode( this ) ).on( 'hidden.bs.modal', this.props
-            .handleHideModal );
+            .handleHideModal )
     }
     save = ( ) => {
         // call getValue() to get the values of the form
@@ -75,4 +75,4 @@ FieldConfigModal.propTypes = {
     handleHideModal: PropTypes.func.isRequired,
     fieldConfig: PropTypes.func.isRequired,
     updateAttribute: PropTypes.func.isRequired,
-};
+}

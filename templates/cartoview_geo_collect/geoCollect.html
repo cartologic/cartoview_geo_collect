@@ -37,6 +37,7 @@
             mapJsonUrl: "{% url 'map_json' mapid=instance.map.id %}",
             proxy: "{{ PROXY_URL }}",
             appInstance: "{% url 'api_dispatch_detail' api_name='api' resource_name='appinstances' pk=instance.id %}",
+            historyListCreate: "{% url 'api_dispatch_list' api_name='collector_api' resource_name='collector_history' %}",
             geoserverUrl : "{{ GEOSERVER_BASE_URL }}",
             save:'{% url 'cartoview_geo_collect.edit' instance_id=instance.id %}',
             static: "{{ STATIC_URL }}",
