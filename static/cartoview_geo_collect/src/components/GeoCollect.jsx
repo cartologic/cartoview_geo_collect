@@ -201,7 +201,7 @@ class GeoCollect extends Component {
                                 <span className="h3"><b>{config.title || 'Add'}</b></span>
                             </div>
                         </div>
-                        {currentComponent==="savingPanel" && <SavingPanel saving={saving}/>}
+                        {currentComponent==="savingPanel" && <SavingPanel urls={urls} saving={saving}/>}
                         {currentComponent==="detailsPage" && <DetailsPage saveAll={this.saveAll} setCurrentComponent={this.setCurrentComponent} file={file} attrsValue={attrsValue} />}
                         {currentComponent==="attrsForm" && <AttrsForm setCurrentComponent={this.setCurrentComponent} onSave={this.setAttrsValue} key="attrsForm" attributes={config.config.attributes} ref={f => this.form = f} />}
                         {currentComponent==="fileForm" && <FileForm file={file} setCurrentComponent={this.setCurrentComponent} message={this.state.message} onSave={this.setFileFormValue} ref={f => this.fileForm = f} key="fileform" />}

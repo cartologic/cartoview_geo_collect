@@ -46,6 +46,7 @@
             attachmentUploadUrl:function(layerName){
                 return '/apps/cartoview_attachment_manager/'+layerName+'/file'
         },
+        viewURL: "{% url "cartoview_geo_collect.view" instance_id=instance.id %}",
         appLogo:'{% static 'cartoview_geo_collect/logo.png' %}',
         }
     {% endif %}
