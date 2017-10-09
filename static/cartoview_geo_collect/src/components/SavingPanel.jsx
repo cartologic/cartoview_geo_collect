@@ -13,7 +13,7 @@ export default class SavingPanel extends Component {
             {saving && <Spinner name="line-scale-pulse-out" color="steelblue"/>}
             {!saving && <div>
                 <div className="alert alert-success" role="alert">{'Your Data Saved Successfully'}</div>
-                <a href={urls.viewURl} className="btn btn-lg btn-success">Add New Entry</a>
+                <a href={urls.viewURL} className="btn btn-lg btn-success">Add New Entry</a>
                 </div>}
         </div>
 

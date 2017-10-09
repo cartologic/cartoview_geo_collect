@@ -32,6 +32,10 @@ let map_obj = new ol.Map( {
         zoom: 3
     } )
 } )
+const timesIcon =
+    <i style={{ color: "#e2372a" }} className="fa fa-times-circle-o fa-lg" aria-hidden="true"></i>
+const successIcon =
+    <i style={{ color: "#4caf50" }} className="fa fa-check-square-o fa-lg" aria-hidden="true"></i>
 class GeoCollect extends Component {
     constructor( props ) {
         super( props )
@@ -53,10 +57,48 @@ class GeoCollect extends Component {
             this.showModal( )
         }
     }
+    saveAttachment = ( data ) => {
+        const { urls } = this.props
+        return fetch( urls.attachmentUploadUrl( this.layerName( ) ), {
+            method: 'POST',
+            credentials: "same-origin",
+            headers: new Headers( {
+                "Content-Type": "application/json; charset=UTF-8",
+                "X-CSRFToken": getCRSFToken( )
+            } ),
+            body: JSON.stringify( data )
+        } ).then( ( response ) => response.json( ) )
+    }
+    saveLog = ( properties ) => {
+        const { urls } = this.props
+        return fetch( urls.historyListCreate, {
+            method: 'POST',
+            credentials: "same-origin",
+            headers: new Headers( {
+                "Content-Type": "application/json; charset=UTF-8",
+                "X-CSRFToken": getCRSFToken( )
+            } ),
+            body: JSON.stringify( {
+                layer: this
+                    .props.config
+                    .config.layer,
+                data: properties,
+            } )
+        } )
+    }
+    showMessage = ( message, type = "success", icon = timesIcon ) => {
+
+        this.msg.show(
+            message, {
+                time: 5000,
+                type,
+                icon
+            } )
+    }
     saveAll = ( ) => {
-        let that = this;
+        let that = this
         this.setState( { currentComponent: "savingPanel" } )
-        const { config, username, urls } = this.props
+        const { config, username } = this.props
         const { attrsValue, file, xyValue } = this.state
         let { geometryName, layer } = config.config
         if ( typeof ( geometryName ) === "undefined" ) {
@@ -88,55 +130,27 @@ class GeoCollect extends Component {
                     feature_id: fid,
                     tags: [ `geo_collect_${this.layerName( )}` ]
                 }
-                fetch( urls.attachmentUploadUrl( this.layerName( ) ), {
-                        method: 'POST',
-                        credentials: "same-origin",
-                        headers: new Headers( {
-                            "Content-Type": "application/json; charset=UTF-8",
-                            "X-CSRFToken": getCRSFToken( )
-                        } ),
-                        body: JSON.stringify( data )
-                    } ).then( ( response ) => response.json( ) )
-                    .then( res => {
-                        fetch( urls.historyListCreate, {
-                            method: 'POST',
-                            credentials: "same-origin",
-                            headers: new Headers( {
-                                "Content-Type": "application/json; charset=UTF-8",
-                                "X-CSRFToken": getCRSFToken( )
-                            } ),
-                            body: JSON.stringify( {
-                                layer: this
-                                    .props.config
-                                    .config.layer,
-                                data: properties,
-                            } )
-                        } ).then( apiRes => {
+                this.saveAttachment( data ).then( res => {
+                    this.saveLog( properties ).then(
+                        apiRes => {
                             that.setState( { saving: false } )
-                            that.msg.show(
-                                'Your Data Saved successfully', {
-                                    time: 5000,
-                                    type: 'success',
-                                    icon: <i style={{ color: "#4caf50" }} className="fa fa-check-square-o fa-lg" aria-hidden="true"></i>
-                                } )
+                            that.showMessage(
+                                'Your Data Saved successfully',
+                                undefined,
+                                successIcon
+                            )
                         } )
-                    } ).catch( ( error ) => {
-                        this.msg.show(
-                            'Error while saving Data please Contact our Support', {
-                                time: 5000,
-                                type: 'error',
-                                icon: <i style={{ color: "#e2372a" }} className="fa fa-times-circle-o fa-lg" aria-hidden="true"></i>
-                            } )
-                    } )
+                } ).catch( ( error ) => {
+                    that.showMessage(
+                        'Error while saving Data please Contact our Support',
+                        'error' )
+                } )
             }
             //ogc:FeatureId
         } ).catch( ( error ) => {
-            this.msg.show(
-                'Error while saving Data please Contact our Support', {
-                    time: 5000,
-                    type: 'success',
-                    icon: <i style={{ color: "#e2372a" }} className="fa fa-times-circle-o fa-lg" aria-hidden="true"></i>
-                } )
+            that.showMessage(
+                'Error while saving Data please Contact our Support',
+                'error' )
         } )
     }
     layerName( ) {

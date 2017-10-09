@@ -1,3 +1,6 @@
+# -*- coding: utf-8 -*-
+from django.core.management import call_command
+
 __author__ = 'cartologic'
 
 info = {
@@ -14,8 +17,9 @@ info = {
 
 
 def install():
-    pass
+    call_command('makemigrations', 'cartoview_geo_collect')
+    call_command('migrate', 'cartoview_geo_collect')
 
 
 def uninstall():
-    pass
+    call_command('migrate', 'cartoview_geo_collect', 'zero')
