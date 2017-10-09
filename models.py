@@ -17,3 +17,6 @@ class UserHistory(models.Model):
 
     def __unicode__(self):
         return self.created_at.__str__()
+
+    class Meta:
+        ordering = ('-created_at',)

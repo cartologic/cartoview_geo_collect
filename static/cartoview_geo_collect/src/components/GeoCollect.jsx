@@ -7,6 +7,7 @@ import AttrsForm from './AttrsForm'
 import DetailsPage from './DetailsPage'
 import FileForm from './FileForm'
 import Img from 'react-image'
+import InfoModal from './infoModal'
 import LocationForm from './LocationForm'
 import PropTypes from 'prop-types'
 import SavingPanel from './SavingPanel'
@@ -189,6 +190,9 @@ class GeoCollect extends Component {
     onYes = ( ) => {
         this.saveAll( )
     }
+    hideInfoModal = ( ) => {
+        this.setState( { showHistory: false } )
+    }
     toggleComponent = ( component ) => {
         this.setState( { currentComponent: component } )
     }
@@ -201,15 +205,23 @@ class GeoCollect extends Component {
     }
     render( ) {
         const { config, urls } = this.props
-        const { xyValue, saving, currentComponent, attrsValue, file } =
+        const {
+            xyValue,
+            saving,
+            currentComponent,
+            attrsValue,
+            file,
+            showHistory
+        } =
         this.state
         return (
             <div className="row" style={{ paddingTop: 50, paddingBottom: 50 }}>
+            {showHistory && <InfoModal layer={config.config.layer} close={this.hideInfoModal} urls={urls} />}
                 <div className="col-xs-12 col-sm-12 col-md-12 col-lg-12">
                     <AlertContainer ref={a => this.msg = a} {...this.alertOptions} />
                     <div>
                         <div className="container">
-                        <a href="../"><i className="fa fa-question-circle fa-2x pull-right" aria-hidden="true"></i></a>
+                        <a onClick={()=>this.setState({showHistory:true})}  href="javascript:;"><i className="fa fa-question-circle fa-2x pull-right" aria-hidden="true"></i></a>
                         <a href="/"><i className="fa fa-home fa-2x pull-right" aria-hidden="true"></i></a>
                         
                         </div>

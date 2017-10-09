@@ -2,7 +2,7 @@
 import json
 
 from django.shortcuts import get_object_or_404
-from geonode.api.resourcebase_api import LayerResource
+from geonode.api.resourcebase_api import LayerResource, CommonMetaApi
 from geonode.layers.models import Layer
 from tastypie import fields
 from tastypie.authorization import Authorization
@@ -14,7 +14,8 @@ from .models import UserHistory
 
 class CollectorHistoryResource(ModelResource):
     user = fields.DictField(null=False, blank=False)
-    layer = fields.ForeignKey(LayerResource, 'layer', null=False, blank=False)
+    layer = fields.ForeignKey(LayerResource, 'layer',
+                              null=False, blank=False, full=True)
 
     def dehydrate_user(self, bundle):
         return {'username': bundle.obj.user.username, 'id': bundle.obj.user.id}
@@ -40,8 +41,24 @@ class CollectorHistoryResource(ModelResource):
         bundle.obj.layer = layer
         return bundle
 
+    # def build_filters(self, filters=None):
+
+    #     if filters is None:
+    #         filters = {}
+
+    #     orm_filters = super(CollectorHistoryResource,
+    #                         self).build_filters(filters)
+
+    #     # Your filtering
+    #     if 'layer__typename' in filters:
+    #         orm_filters['layer__typename'] = filters.get(
+    #             'layer__typename')
+
+    #     return orm_filters
+
     class Meta:
         queryset = UserHistory.objects.all()
+        LayerResource.Meta.filtering.update({'typename': ALL})
         authorization = Authorization()
         allowed_methods = ['get', 'post', 'put']
         filtering = {'user': ALL_WITH_RELATIONS,
