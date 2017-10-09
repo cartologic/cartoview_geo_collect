@@ -8,23 +8,24 @@ export default class InfoModal extends Component {
         super( props )
         this.state = {
             history: null,
-            totalCount: null
+            totalCount: null,
+            loading: false
         }
     }
     componentWillMount( ) {
         let { urls, layer } = this.props
+        this.setState( { loading: true } )
         fetch( `${urls.historyListCreate}?layer__typename=${layer}` ).then(
             ( response ) => response.json( ) ).then( ( data ) => {
             this.setState( {
                 history: data.objects,
-                totalCount: data
-                    .meta.total_count
+                totalCount: data.meta.total_count,
+                loading: false
             } )
         } ).catch( ( error ) => {
             console.error( error )
         } )
     }
-
     componentDidMount( ) {
         $( this.modal ).modal( 'show' )
         $( this.modal ).on( 'hidden.bs.modal', this.props.close )
@@ -33,9 +34,8 @@ export default class InfoModal extends Component {
         $( this.modal ).modal( 'hide' )
     }
     render( ) {
-        let { history, totalCount } = this.state
+        let { history, totalCount, loading } = this.state
         return (
-
             <div ref={el=>this.modal=el} className="modal fade" tabIndex="-1" role="dialog">
 				<div className="modal-dialog" role="document">
 					<div className="modal-content">
@@ -46,7 +46,7 @@ export default class InfoModal extends Component {
 							<h4 className="modal-title">Info</h4>
 						</div>
 						<div className="modal-body">
-                            {history && totalCount &&  <table className="table table-striped">
+                            {!loading && history.length>0 &&  totalCount!=0  &&  <table className="table table-striped">
                                 <tbody>
                                     <tr>
                                         <td>Number of Collected Points</td>
@@ -58,7 +58,7 @@ export default class InfoModal extends Component {
                                     </tr>
                                 </tbody>
                             </table>}
-                            {history && totalCount &&  <div>
+                            {!loading && history.length>0 &&  totalCount!=0  && <div>
                                 <h3 className="text-center">Last Collected data</h3>
                                 <table className="table table-striped">
                                 <tbody>
@@ -72,7 +72,8 @@ export default class InfoModal extends Component {
                             </table>
                             </div>}
                            
-                            {!history && !totalCount && < Spinner name = "line-scale-pulse-out" color = "steelblue" />}
+                            {loading && < Spinner name = "line-scale-pulse-out" color = "steelblue" />}
+                            {!loading && history.length===0 && totalCount===0 && <h5>No Data Collected</h5>}
 						</div>
 						<div className="modal-footer">
 							<button type="button" className="btn btn-default" data-dismiss="modal">Close</button>
@@ -86,5 +87,5 @@ export default class InfoModal extends Component {
 InfoModal.propTypes = {
     urls: PropTypes.object.isRequired,
     close: PropTypes.func.isRequired,
-    layer:PropTypes.string.isRequired
+    layer: PropTypes.string.isRequired
 }
