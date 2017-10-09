@@ -85,5 +85,6 @@ export default class InfoModal extends Component {
 }
 InfoModal.propTypes = {
     urls: PropTypes.object.isRequired,
-    close: PropTypes.func.isRequired
+    close: PropTypes.func.isRequired,
+    layer:PropTypes.string.isRequired
 }

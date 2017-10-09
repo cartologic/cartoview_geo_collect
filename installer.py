@@ -22,4 +22,4 @@ def install():
 
 
 def uninstall():
-    call_command('migrate', 'cartoview_geo_collect', 'zero')
+    pass
