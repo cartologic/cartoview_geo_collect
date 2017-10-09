@@ -14,7 +14,7 @@ from .models import UserHistory
 
 class CollectorHistoryResource(ModelResource):
     user = fields.DictField(null=False, blank=False)
-    layer = fields.DictField(null=False, blank=False)
+    layer = fields.ForeignKey(LayerResource, 'layer', null=False, blank=False)
 
     def dehydrate_user(self, bundle):
         return {'username': bundle.obj.user.username, 'id': bundle.obj.user.id}
