@@ -1,6 +1,7 @@
 import React, { Component } from 'react'
 
 import PropTypes from 'prop-types'
+import ReactJson from 'react-json-view'
 import Spinner from 'react-spinkit'
 
 export default class InfoModal extends Component {
@@ -54,22 +55,17 @@ export default class InfoModal extends Component {
                                     </tr>
                                     <tr>
                                         <td>Last Point Collected at</td>
-                                        <td>{new Date(history[0].created_at).toDateString()}</td>
+                                        <td>{new Date(history[0].created_at).toString()}</td>
                                     </tr>
                                 </tbody>
                             </table>}
-                            {!loading && history.length>0 &&  totalCount!=0  && <div>
-                                <h3 className="text-center">Last Collected data</h3>
-                                <table className="table table-striped">
-                                <tbody>
-                                    {Object.keys(history[0].data).map(key=>{
-                                        return <tr key={key}>
-                                            <td>{key}</td>
-                                            <td>{history[0].data[key]}</td>
-                                        </tr>
-                                    })}
-                                </tbody>
-                            </table>
+                            {!loading && history.length>0 &&  totalCount!=0  && <div className="container-fluid">
+                            <h3 className="text-center">Last Collected data</h3>
+                                <div className="row">
+                                    <div style={{overflowX:'overlay'}} className="col-md-12">
+                                    <ReactJson src={history[0].data} name={'data'} enableClipboard={false} displayDataTypes={false} />
+                                    </div>
+                                </div>
                             </div>}
                            
                             {loading && < Spinner name = "line-scale-pulse-out" color = "steelblue" />}
