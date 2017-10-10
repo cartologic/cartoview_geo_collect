@@ -4,8 +4,9 @@ import React from 'react'
 export default class ImageUploader extends React.Component {
     constructor( props ) {
         super( props )
+        const { config } = this.props
         this.state = {
-            file: this.props.config ? this.props.config.logo : null,
+            file: config.config.logo ? config.config.logo : config.logo ? config.logo:null,
             messages: ""
         }
     }

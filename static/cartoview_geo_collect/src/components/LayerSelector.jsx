@@ -2,67 +2,52 @@
 import React, { Component } from 'react'
 
 import PropTypes from 'prop-types'
+
 export default class LayerSelector extends Component {
-    constructor( props ) {
-        super( props )
+    constructor(props) {
+        super(props)
+        const { config } = this.props
         this.state = {
-            layers: [ ],
+            layers: [],
             loading: true,
-            selectedLayer: this.props.config ? this.props.config.layer : null,
-            attributes: [ ],
+            selectedLayer: config ? config.layer : null,
+            attributes: [],
         }
     }
-    selectLayer( ) {
-        if ( this.refs.selectedLayer.value ) {
-            this.setState( {
+    selectLayer() {
+        if (this.refs.selectedLayer.value) {
+            this.setState({
                 selectedLayer: this.refs.selectedLayer.value
-            }, this.loadAttributes( ) )
+            })
         }
     }
-    loadAttributes( ) {
-        let typename = this.refs.selectedLayer ? this.refs.selectedLayer.value :
-            this.state.selectedLayer
-        if ( typename != "" && typename ) {
-            fetch( this.props.urls.layerAttributes + "?layer__typename=" +
-                typename ).then( ( response ) => response.json( ) ).then(
-                ( data ) => {
-                    this.setState( { attributes: data.objects } )
-                } ).catch( ( error ) => {
-                console.error( error )
-            } )
-        }
+    loadLayers() {
+        fetch(this.props.urls.mapLayers + "?id=" + this.props.map.id).then(
+            (response) => response.json()).then((data) => {
+                let pointLayers = data.objects.filter((layer) => {
+                    return layer.layer_type.toLowerCase().includes(
+                        "point")
+                })
+                this.setState({ layers: pointLayers, loading: false })
+            }).catch((error) => {
+                console.error(error)
+            })
     }
-    loadLayers( ) {
-        fetch( this.props.urls.mapLayers + "?id=" + this.props.map.id ).then(
-            ( response ) => response.json( ) ).then( ( data ) => {
-            let pointLayers = data.objects.filter( ( layer ) => {
-                return layer.layer_type.toLowerCase( ).includes(
-                    "point" )
-            } )
-            this.setState( { layers: pointLayers, loading: false } )
-        } ).catch( ( error ) => {
-            console.error( error )
-        } )
+    handleSubmit() {
+        this.refs.submitButton.click()
     }
-    handleSubmit( ) {
-        this.refs.submitButton.click( )
+    componentWillMount() {
+        this.loadLayers()
     }
-    componentWillMount( ) {
-        this.loadLayers( )
-        if ( this.state.selectedLayer ) {
-            this.loadAttributes( )
-        }
-    }
-    save( e ) {
-        e.preventDefault( )
-        this.props.setAttributes( this.state.attributes )
-        this.props.onComplete( {
+    save(e) {
+        e.preventDefault()
+        this.props.onComplete({
             config: {
                 layer: this.state.selectedLayer
             }
-        } )
+        })
     }
-    render( ) {
+    render() {
         let { layers, loading, attributes, selectedLayer } = this.state
         return (
             <div className="row">
@@ -129,7 +114,6 @@ export default class LayerSelector extends Component {
 }
 LayerSelector.propTypes = {
     onComplete: PropTypes.func.isRequired,
-    setAttributes: PropTypes.func.isRequired,
     onPrevious: PropTypes.func.isRequired,
     config: PropTypes.object,
     urls: PropTypes.object.isRequired,

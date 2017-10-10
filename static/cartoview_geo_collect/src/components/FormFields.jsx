@@ -12,82 +12,137 @@ const initialTypeMapping = {
     boolean: "checkbox",
     datetime: "datetime"
 }
-const Options = t.struct( {
+const Options = t.struct({
     label: t.String,
     value: t.String
-} )
+})
 export default class FormFields extends Component {
-    constructor( props ) {
-        super( props )
+    constructor(props) {
+        super(props)
+        const { config, attributes, currentLayer } = this.props
         this.state = {
-            attributes: this.props.config && this.props.currentConfig.config.layer === this.props.config.layer ? this.props.config.attributes : [ ],
-            geometryName: undefined,
-            allAttributes: this.props.attributes,
+            attributes: typeof (config.layer) === "undefined" ? [] : config
+                .config.layer === config.layer ? config.attributes : [],
+            geometryName: null,
+            allAttributes: attributes,
             showModal: false,
             attribute: null,
             loading: false,
-            fieldList: [ ],
+            fieldList: [],
             fieldConfig: null,
             defaultValue: null,
-            currentId: null
+            currentId: null,
+            featureTypes: null,
+            formFieldOptions: null
         }
     }
-    componentDidMount( ) {
-        if ( this.state.attributes.length == 0 ) {
-            this.init( )
+    componentWillMount() {
+        const { config } = this.props
+        fetch(this.props.urls.layerAttributes + "?layer__typename=" +
+            config.config.layer).then((response) => response.json())
+            .then(
+            (data) => {
+                this.setState({ allAttributes: data.objects })
+            }).catch((error) => {
+                console.error(error)
+            })
+    }
+    init = () => {
+        let attributes = []
+        this.setState({ loading: true })
+        this.state.allAttributes.map((attribute) => {
+            if (attribute.attribute_type.indexOf("gml") == 0) {
+                this.setState({ geometryName: attribute.attribute })
+                return;
+            }
+            let dataType = this.getDataType(attribute);
+            attributes.push({
+                included: true,
+                name: attribute.attribute,
+                id: attribute.id,
+                label: attribute.attribute_label ||
+                attribute.attribute,
+                placeholder: attribute.attribute_label ||
+                attribute.attribute,
+                helpText: "",
+                required: !this.checkNillable(attribute.attribute) ?
+                    true : false,
+                defaultValue: null,
+                options: [],
+                dataType: dataType,
+                fieldType: initialTypeMapping[dataType] ||
+                "text"
+            });
+        })
+        this.setState({ attributes: attributes, loading: false })
+    }
+    componentDidMount() {
+        const { doDescribeFeatureType, config } = this.props
+        doDescribeFeatureType(config.config.layer).then(result => {
+            this.setState({
+                featureTypes: result.featureTypes[0].properties
+            })
+        })
+        if (this.state.attributes.length == 0) {
+            doDescribeFeatureType(config.config.layer).then(result => {
+                this.setState({
+                    featureTypes: result.featureTypes[0]
+                        .properties
+                }, this.init)
+            })
         }
     }
-    getDataType = ( attribute ) => {
-        return attribute.attribute_type.split( ":" ).pop( ).toLowerCase( );
+    getDataType = (attribute) => {
+        return attribute.attribute_type.split(":").pop().toLowerCase();
     }
-    searchById = ( id ) => {
-        let result = this.state.attributes.find( ( attribute, index ) => {
+    searchById = (id) => {
+        let result = this.state.attributes.find((attribute, index) => {
             return attribute.id === id
-        } )
+        })
         return result
     }
-    getFieldList( fieldType ) {
+    getFieldList(fieldType) {
         let fieldList = null
-        switch ( fieldType ) {
-        case "text":
-            fieldList = t.enums( {
-                text: 'Text',
-                textarea: 'Multi-line Text',
-                select: "Drop Down List",
-                checkboxList: "Checkbox List",
-                radioList: "Radio Button List"
-            } )
-            break
-        case "number":
-            fieldList = t.enums( {
-                number: "Number",
-                chekbox: "Checkbox",
-                select: "Drop Down List",
-                radioList: "Radio Button List"
-            } )
-            break
-        case "boolean":
-            fieldList = t.enums( { chekbox: "Checkbox" } );
-            break
-        case "datatime":
-            fieldList = t.enums( {
-                text: 'Text',
-                textarea: 'Multi-line Text',
-                number: "Number",
-                chekbox: "Checkbox",
-                select: "Drop Down List",
-                checkboxList: "Checkbox List",
-                radioList: "Radio Button List",
-                datatime: "Date"
-            } )
-            break
+        switch (fieldType) {
+            case "text":
+                fieldList = t.enums({
+                    text: 'Text',
+                    textarea: 'Multi-line Text',
+                    select: "Drop Down List",
+                    checkboxList: "Checkbox List",
+                    radioList: "Radio Button List"
+                })
+                break
+            case "number":
+                fieldList = t.enums({
+                    number: "Number",
+                    chekbox: "Checkbox",
+                    select: "Drop Down List",
+                    radioList: "Radio Button List"
+                })
+                break
+            case "boolean":
+                fieldList = t.enums({ chekbox: "Checkbox" });
+                break
+            case "datatime":
+                fieldList = t.enums({
+                    text: 'Text',
+                    textarea: 'Multi-line Text',
+                    number: "Number",
+                    chekbox: "Checkbox",
+                    select: "Drop Down List",
+                    checkboxList: "Checkbox List",
+                    radioList: "Radio Button List",
+                    datatime: "Date"
+                })
+                break
         }
         return fieldList
     }
-    generateForm = ( attribute ) => {
-        let fieldList = this.getFieldList( attribute.fieldType ) || this.getFieldList(
-            initialTypeMapping[ attribute.dataType ] || "text" )
-        const fieldConfig = t.struct( {
+    generateForm = (attribute) => {
+        let fieldList = this.getFieldList(attribute.fieldType) || this.getFieldList(
+            initialTypeMapping[attribute.dataType] || "text")
+        const fieldConfig = t.struct({
             name: t.String,
             dataType: t.String,
             label: t.String,
@@ -97,8 +152,8 @@ export default class FormFields extends Component {
             required: t.Boolean,
             defaultValue: t.maybe(t.String),
             fieldType: fieldList,
-            options: t.list( Options )
-        } )
+            options: t.list(Options)
+        })
         const defaultValue = {
             name: attribute.name,
             dataType: attribute.dataType,
@@ -111,62 +166,66 @@ export default class FormFields extends Component {
             required: attribute.required,
             defaultValue: attribute.defaultValue
         }
-        this.setState( { fieldConfig: fieldConfig, defaultValue: defaultValue } )
+        const attributeDisabled = attribute.required ? {
+            required: {
+                disabled: true
+            }
+        } : {}
+        const formFieldOptions = {
+            fields: {
+                name: {
+                    disabled: true
+                },
+                dataType: {
+                    disabled: true
+                },
+                fieldType: {
+                    nullOption: {
+                        value: '',
+                        text: 'Choose Field Type'
+                    }
+                },
+                id: {
+                    type: 'hidden'
+                },
+                ...attributeDisabled
+            }
+        }
+        this.setState({ fieldConfig, defaultValue, formFieldOptions })
     }
-    updateAttribute = ( attribute ) => {
+    updateAttribute = (attribute) => {
         let { attributes } = this.state
-        let currentAtrribute = this.searchById( attribute.id )
-        if ( currentAtrribute ) {
-            const id = attributes.indexOf( currentAtrribute )
-            let updatedObj = update( currentAtrribute, { $merge: attribute } )
-            attributes[ id ] = updatedObj
-            this.setState( { attributes: attributes } )
+        let currentAtrribute = this.searchById(attribute.id)
+        if (currentAtrribute) {
+            const id = attributes.indexOf(currentAtrribute)
+            let updatedObj = update(currentAtrribute, { $merge: attribute })
+            attributes[id] = updatedObj
+            this.setState({ attributes: attributes })
         }
     }
-    init = ( ) => {
-        let attributes = [ ];
-        this.setState( { loading: true } )
-        this.state.allAttributes.map( ( attribute ) => {
-            if ( attribute.attribute_type.indexOf( "gml" ) == 0 ) {
-                this.setState( { geometryName: attribute.attribute } )
-                return;
-            }
-            let dataType = this.getDataType( attribute );
-            attributes.push( {
-                included: true,
-                name: attribute.attribute,
-                id: attribute.id,
-                label: attribute.attribute_label ||
-                    attribute.attribute,
-                placeholder: attribute.attribute_label ||
-                    attribute.attribute,
-                helpText: "",
-                required: false,
-                defaultValue: null,
-                options: [ ],
-                dataType: dataType,
-                fieldType: initialTypeMapping[ dataType ] ||
-                    "text"
-            } );
-        } )
-        this.setState( { attributes: attributes, loading: false } )
+    includeChanged = (id) => {
+        let { attributes } = this.state
+        let currentAtrribute = this.searchById(id)
+        attributes[attributes.indexOf(currentAtrribute)].included =
+            this.refs["attr_check_" + id].checked
+        this.setState({ attributes: attributes })
     }
-    includeChanged = ( id ) => {
-        let { attributes } = this.state;
-        let currentAtrribute = this.searchById( id )
-        attributes[ attributes.indexOf( currentAtrribute ) ].included =
-            this.refs[ "attr_check_" + id ].checked
-        this.setState( { attributes: attributes } )
+    openModal = (attribute) => {
+        this.generateForm(attribute)
+        this.setState({ showModal: true })
     }
-    openModal = ( attribute ) => {
-        this.generateForm( attribute )
-        this.setState( { showModal: true } )
+    handleHideModal = () => {
+        this.setState({ showModal: false })
     }
-    handleHideModal = ( ) => {
-        this.setState( { showModal: false } )
+    checkNillable = (attributeName) => {
+        const { featureTypes } = this.state
+        let result = featureTypes.filter(attr => attr.name ===
+            attributeName)
+        let nillable = result.length > 0 ? result[0].nillable : true
+        return nillable
     }
-    render( ) {
-        let { loading } = this.state
+    render() {
+        let { loading, featureTypes } = this.state
         return (
             <div className="row">
                 <div className="row">
@@ -178,9 +237,9 @@ export default class FormFields extends Component {
 
                                 margin: "0px 3px 0px 3px"
                             }}
-                            className={loading ? "btn btn-primary btn-sm pull-right disabled" :"btn btn-primary btn-sm pull-right"}
+                            className={loading ? "btn btn-primary btn-sm pull-right disabled" : "btn btn-primary btn-sm pull-right"}
                             onClick={() => {
-                                this.props.onComplete({attributes: this.state.attributes, geometryName: this.state.geometryName })
+                                this.props.onComplete({ attributes: this.state.attributes, geometryName: this.state.geometryName })
                             }}>{"next "}
                             <i className="fa fa-arrow-right"></i>
                         </button>
@@ -203,15 +262,20 @@ export default class FormFields extends Component {
                 </div>
                 <hr></hr>
                 <div className="row">
-                    {this.state.attributes.length > 0 && this.state.attributes.map((attribute, index) => {
+                    {this.state.attributes.length > 0 && featureTypes && featureTypes.length > 0 && this.state.attributes.map((attribute, index) => {
                         return <div key={index} className="col-lg-6">
                             <div className="input-group">
                                 <span className="input-group-addon">
-                                    <input
+                                    {!this.checkNillable(attribute.name) ? <input
                                         defaultChecked={attribute.included}
                                         onChange={() => this.includeChanged(attribute.id)}
                                         ref={"attr_check_" + attribute.id}
-                                        type="checkbox" />
+                                        type="checkbox" disabled /> : <input
+                                            defaultChecked={attribute.included}
+                                            onChange={() => this.includeChanged(attribute.id)}
+                                            ref={"attr_check_" + attribute.id}
+                                            type="checkbox" />}
+
                                 </span>
                                 <input type="text" value={attribute.label} className="form-control" disabled />
                                 <span className="input-group-addon" id="basic-addon2">
@@ -222,6 +286,7 @@ export default class FormFields extends Component {
                     })}
                     {this.state.showModal
                         ? <FieldConfigModal
+                            options={this.state.formFieldOptions}
                             fieldConfig={this.state.fieldConfig}
                             defaultValue={this.state.defaultValue}
                             handleHideModal={this.handleHideModal} updateAttribute={this.updateAttribute} />

@@ -36,6 +36,7 @@ class GeoCollect(StandardAppViews):
     def save(self, request, instance_id=None):
         res_json = dict(success=False)
         data = json.loads(request.body)
+        print(data)
         config = data.get('config', None)
         base64_image = config.get(
             'logo', None)
@@ -89,9 +90,9 @@ class GeoCollect(StandardAppViews):
 
         # update the instance keywords
         if hasattr(instance_obj, 'keywords') and keywords:
-            for k in keywords:
-                if k.get('value', None) not in instance_obj.keyword_list():
-                    instance_obj.keywords.add(k.get('value', None))
+            new_keywords = [k.get('value', None) for k in keywords if k.get(
+                'value', None) not in instance_obj.keyword_list()]
+            instance_obj.keywords.add(*new_keywords)
 
         res_json.update(dict(success=True, id=instance_obj.id))
         return HttpResponse(json.dumps(res_json),

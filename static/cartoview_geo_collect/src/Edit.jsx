@@ -2,56 +2,92 @@ import './css/app.css'
 
 import React, { Component } from 'react'
 
-import EditService from './services/editService.jsx'
 import FormFields from './components/FormFields'
 import General from './components/General.jsx'
 import ImageUploader from "./components/ImageUploader.jsx"
 import LayerSelector from "./components/LayerSelector.jsx"
 import NavigationTools from './components/NavigationTools.jsx'
 import Navigator from './components/Navigator.jsx'
+import PropTypes from 'prop-types'
 import ResourceSelector from './components/ResourceSelector.jsx'
+import { getCRSFToken } from './helpers/helpers.jsx'
 
 export default class Edit extends Component {
     constructor( props ) {
         super( props )
+        const { config } = this.props
         this.state = {
             step: 0,
-            attributes: [ ],
-            config: {},
-            selectedResource: this.props.config.instance ? this.props.config
-                .instance.map : undefined
+            title: config ? config.title : null,
+            abstract: config ? config.abstract : null,
+            config: config ? config.config : null,
+            selectedResource: config ? config.map : null,
+            id: config ? config.id : null
         }
-        this.editService = new EditService( { baseUrl: '/' } )
     }
     goToStep( step ) {
         this.setState( { step } )
+    }
+    doDescribeFeatureType = ( typename ) => {
+        let { urls } = this.props
+        return fetch( urls.describeFeatureType( typename ) ).then(
+            ( response ) => response.json( ) )
+    }
+    save = ( instanceConfig ) => {
+        const { config } = this.state
+        const { urls } = this.props
+        const { id } = this.state
+        const url = id ? urls.editURL( id ) : urls.newURL
+        this.setState( {
+            config: instanceConfig
+        } )
+        fetch( url, {
+            method: 'POST',
+            credentials: "same-origin",
+            headers: new Headers( { "Content-Type": "application/json; charset=UTF-8", "X-CSRFToken": getCRSFToken( ) } ),
+            body: JSON.stringify( instanceConfig )
+        } ).then( ( response ) => response.json( ) ).then( result => {
+            if ( result.success === true ) {
+                this.setState( {
+                    success: true,
+                    id: result.id
+                } )
+            }
+        } )
     }
     onPrevious( ) {
         let { step } = this.state
         this.goToStep( step -= 1 )
     }
     render( ) {
-        var { step } = this.state
+        let { urls, username, keywords,currentLayer } = this.props
+        var {
+            step,
+            selectedResource,
+            config,
+            success,
+            abstract,
+            title,
+            id
+        } = this.state
         const steps = [
             {
                 label: "Select Map",
                 component: ResourceSelector,
                 props: {
-                    resourcesUrl: this.props.config.urls.resources_url,
-                    instance: this.state.selectedResource,
-                    username: this.props.username,
+                    resourcesUrl: urls.resources_url,
+                    username: username,
+                    selectedResource: selectedResource,
                     selectMap: ( resource ) => {
                         this.setState( { selectedResource: resource } )
                     },
-                    limit: this.props.config.limit,
+                    limit: 9,
                     onComplete: ( ) => {
-                        var { step } = this.state
+                        var { step, config } = this.state
                         this.setState( {
-                            config: Object.assign( this.state
-                                .config, {
-                                    map: this.state.selectedResource
-                                        .id
-                                } )
+                            config: { ...config,
+                                map: selectedResource.id
+                            }
                         } )
                         this.goToStep( ++step )
                     }
@@ -60,46 +96,38 @@ export default class Edit extends Component {
                 label: "Select Layer",
                 component: LayerSelector,
                 props: {
-                    map: this.state.selectedResource,
-                    setAttributes: ( attributes ) => {
-                        this.setState( { attributes: attributes } )
-                    },
-                    config: this.props.config.instance ? this.props.config
-                        .instance.config : this.state.config.config,
-                    urls: this.props.config.urls,
+                    map: selectedResource,
+                    config,
+                    urls,
                     onComplete: ( listConfig ) => {
-                        let { step } = this.state
-                        let currentConfig = this.state.config
-                        let newConfig = Object.assign(
-                            currentConfig, listConfig )
+                        let { step, config } = this.state
                         this.setState( {
-                            config: currentConfig
+                            config: { ...config,
+                                ...listConfig
+                            }
                         }, this.goToStep( ++step ) )
                     },
                     onPrevious: ( ) => {
                         this.onPrevious( )
                     }
                 }
-             }, {
+            }, {
                 label: "Form Customization",
                 component: FormFields,
                 props: {
-                    map: this.state.selectedResource,
-                    attributes: this.state.attributes,
-                    config: this.props.config.instance ? this.props.config
-                        .instance.config : typeof ( this.state.config.config ) !==
-                        "undefined" && typeof ( this.state.config.config
-                            .attributes ) !== "undefined" ? this.state
-                        .config.config : null,
-                    currentConfig: this.state.config,
-                    urls: this.props.config.urls,
-                    onComplete: ( config ) => {
-                        let { step } = this.state
-                        let currentConfig = this.state.config
-                        Object.assign( currentConfig.config,
-                            config )
+                    map: selectedResource,
+                    config,
+                    urls,
+                    currentLayer,
+                    doDescribeFeatureType: this.doDescribeFeatureType,
+                    onComplete: ( fieldConfig ) => {
+                        let { step, config } = this.state
                         this.setState( {
-                            config: currentConfig
+                            config: { ...config,
+                                config: { ...config.config,
+                                    ...fieldConfig
+                                }
+                            }
                         }, this.goToStep( ++step ) )
                     },
                     onPrevious: ( ) => {
@@ -110,14 +138,16 @@ export default class Edit extends Component {
                 label: "Logo",
                 component: ImageUploader,
                 props: {
-                    config: this.props.config.instance ? this.props.config
-                        .instance.config : null,
-                    urls: this.props.config.urls,
+                    config,
+                    urls,
                     onComplete: ( Image ) => {
                         let { step, config } = this.state
-                        Object.assign( config.config, Image )
                         this.setState( {
-                            config: config
+                            config: { ...config,
+                                config: { ...config.config,
+                                    ...Image
+                                }
+                            }
                         }, this.goToStep( ++step ) )
                     },
                     onPrevious: ( ) => {
@@ -128,17 +158,18 @@ export default class Edit extends Component {
                 label: "General ",
                 component: General,
                 props: {
-                    state: this.state,
-                    keywords: this.props.keywords,
-                    urls: this.props.config.urls,
-                    instance: this.state.selectedResource,
-                    config: this.props.config.instance ? this.props.config
-                        .instance.config : null,
+                    keywords: config && config.keywords ? config.keywords : keywords,
+                    urls,
+                    abstract,
+                    title,
+                    selectedResource,
+                    config,
                     onComplete: ( basicConfig ) => {
-                        let { step } = this.state
+                        let { step, config } = this.state
                         this.setState( {
-                            config: Object.assign( this.state
-                                .config, basicConfig )
+                            config: { ...config,
+                                ...basicConfig
+                            }
                         } )
                         this.goToStep( ++step )
                     },
@@ -149,47 +180,26 @@ export default class Edit extends Component {
             }, {
                 label: "Navigation Tools",
                 component: NavigationTools,
-                urls: this.props.config.urls,
                 props: {
-                    instance: this.state.selectedResource,
-                    config: this.props.config.instance ? this.props.config
-                        .instance.config : null,
-                    id: this.props.config.instance ? this.props.config
-                        .instance.id : this.state.id ? this.state.id :
-                        undefined,
-                    urls: this.props.config.urls,
-                    success: this.state.success,
+                    instance: selectedResource,
+                    config,
+                    urls,
+                    success,
+                    id:id,
                     onComplete: ( basicConfig ) => {
-                        var { step, config } = this.state
-                        let newConfig = Object.assign( config.config,
-                            basicConfig )
-                        this.setState( {
-                            config: config
-                        }, ( ) => {
-                            this.editService.save( this.state
-                                .config, this.state.id ?
-                                this.state.id : this.props
-                                .config.instance ?
-                                this.props.config.instance
-                                .id : undefined ).then(
-                                ( res ) => {
-                                    if ( res.success ===
-                                        true ) {
-                                        this.setState( {
-                                            success: true,
-                                            id: res
-                                                .id
-                                        } )
-                                    }
-                                } )
-                        } )
+                        var { config } = this.state
+                        const instanceConfig = { ...config,
+                            config: { ...config.config,
+                                ...basicConfig
+                            }
+                        }
+                        this.save( instanceConfig )
                     },
                     onPrevious: ( ) => {
                         this.onPrevious( )
                     }
                 }
-            }
-        ]
+            } ]
         return (
             <div className="wrapping">
                 <Navigator
@@ -202,4 +212,12 @@ export default class Edit extends Component {
             </div>
         )
     }
+}
+Edit.propTypes = {
+    urls: PropTypes.object.isRequired,
+    config: PropTypes.object,
+    username: PropTypes.string.isRequired,
+    title: PropTypes.string,
+    abstract: PropTypes.string,
+    keywords: PropTypes.array
 }

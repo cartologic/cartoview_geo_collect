@@ -60,8 +60,10 @@ export default class ResourceSelector extends Component {
             let url = `/api/maps/?&title__icontains=${ mapTitle }`
             fetch( url, { credentials: 'include' } ).then( ( res ) => res.json( ) )
                 .then( ( resources ) => {
-                    this.setState( { resources: resources.objects,
-                        showPagination: false } )
+                    this.setState( {
+                        resources: resources.objects,
+                        showPagination: false
+                    } )
                 } )
         } else {
             // clear button
@@ -85,6 +87,7 @@ export default class ResourceSelector extends Component {
         }
     }
     render( ) {
+        let { selectedResource } = this.props
         let { loading } = this.state
         return (
             <div>
@@ -93,8 +96,8 @@ export default class ResourceSelector extends Component {
 						<h4>{'Select Map'}</h4>
 					</div>
 					<div className="col-xs-7 col-md-8">
-						{( this.props.instance
-							? this.props.instance
+						{( selectedResource
+							? selectedResource
 							: false )
 							? <button
 									style={{
@@ -160,8 +163,8 @@ export default class ResourceSelector extends Component {
 						<div
 							onClick={( ) => this.props.selectMap( resource )}
 							key={resource.id}
-							className={( this.props.instance
-							? ( this.props.instance && this.props.instance.id == resource.id )
+							className={( selectedResource
+							? ( selectedResource && selectedResource.id == resource.id )
 							: false )
 							? "row resource-box bg-success"
 							: "row resource-box"}>

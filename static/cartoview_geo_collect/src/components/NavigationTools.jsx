@@ -1,19 +1,15 @@
-import React, { Component } from 'react';
+import React, { Component } from 'react'
 
-import t from 'tcomb-form';
+import PropTypes from 'prop-types'
+import t from 'tcomb-form'
 
-// const zoomControls = t.struct({   duration: t.Number,   ZoomInTip: t.String,
-// delta: t.Number,   ZoomOutTip: t.String, })
-//
-// const showZoomControls = t.struct({   showZoomControl: t.Boolean,
-// zoomControls: zoomControls })
 const mapConfig = t.struct( {
     showZoombar: t.Boolean,
     showLayerSwitcher: t.Boolean,
     showBaseMapSwitcher: t.Boolean,
     showLegend: t.Boolean,
     EnableGeolocation: t.Boolean
-} );
+} )
 const options = {
     fields: {
         showZoombar: {
@@ -33,19 +29,23 @@ const options = {
         }
     }
 };
-const Form = t.form.Form;
+const Form = t.form.Form
 export default class NavigationTools extends Component {
     constructor( props ) {
         super( props )
+        const { config } = this.props
         this.state = {
             defaultConfig: {
-                showZoombar: this.props.config ? this.props.config.showZoombar : true,
-                showLayerSwitcher: this.props.config ? this.props.config
-                    .showLayerSwitcher : true,
-                showBaseMapSwitcher: this.props.config ? this.props.config
-                    .showBaseMapSwitcher : true,
-                showLegend: this.props.config ? this.props.config.showLegend : true,
-                EnableGeolocation: this.props.config ? this.props.config.EnableGeolocation : true
+                showZoombar: config && config.config && config.config.showZoombar ?
+                    config.config.showZoombar : true,
+                showLayerSwitcher: config && config.config && config.config
+                    .showLayerSwitcher ? config.config.showLayerSwitcher : true,
+                showBaseMapSwitcher: config && config.config && config
+                    .config.showBaseMapSwitcher ? config.config.showBaseMapSwitcher : true,
+                showLegend: config && config.config && config.config.showLegend ?
+                    config.config.showLegend : true,
+                EnableGeolocation: config && config.config && config.config
+                    .EnableGeolocation ? config.config.EnableGeolocation : true,
             }
         }
     }
@@ -55,105 +55,77 @@ export default class NavigationTools extends Component {
         } )
     }
     save( ) {
-        var basicConfig = this.refs.form.getValue( );
+        var basicConfig = this.refs.form.getValue( )
         if ( basicConfig ) {
             const properConfig = {
                 showZoombar: basicConfig.showZoombar,
                 showLayerSwitcher: basicConfig.showLayerSwitcher,
                 showBaseMapSwitcher: basicConfig.showBaseMapSwitcher,
-				showLegend: basicConfig.showLegend,
-				EnableGeolocation:basicConfig.EnableGeolocation
+                showLegend: basicConfig.showLegend,
+                EnableGeolocation: basicConfig.EnableGeolocation
             }
             this.props.onComplete( properConfig )
         }
     }
     render( ) {
+        let { urls, id, onPrevious } = this.props
         return (
             <div className="row">
-				<div className="row">
-					<div className="col-xs-5 col-md-4"></div>
-					<div className="col-xs-7 col-md-8">
-						<button
-							style={{
-							display: "inline-block",
-							margin: "0px 3px 0px 3px"
-						}}
-							className="btn btn-primary btn-sm pull-right disabled"
-							onClick={this.save.bind( this )}>{"next "}<i className="fa fa-arrow-right"></i></button>
+                <div className="row">
+                    <div className="col-xs-5 col-md-4"></div>
+                    <div className="col-xs-7 col-md-8">
+                        <button className="top-buttons btn btn-primary btn-sm pull-right disabled" onClick={this.save.bind(this)}>{"next "}<i className="fa fa-arrow-right"></i></button>
 
-						<button
-							style={{
-							display: "inline-block",
-							margin: "0px 3px 0px 3px"
-						}}
-							className="btn btn-primary btn-sm pull-right"
-							onClick={( ) => this.props.onPrevious( )}><i className="fa fa-arrow-left"></i>{" Previous"}</button>
-					</div>
-				</div>
-				<div className="row" style={{
-					marginTop: "3%"
-				}}>
-					<div className="col-xs-5 col-md-4">
-						<h4>{'NavigationTools '}</h4>
-					</div>
-					<div className="col-xs-7 col-md-8">
-						<a
-							style={{
-							display: "inline-block",
-							margin: "0px 3px 0px 3px"
-						}}
-							className={this.state.success === true
-							? "btn btn-primary btn-sm pull-right"
-							: "btn btn-primary btn-sm pull-right disabled"}
-							href={`/apps/cartoview_geo_collect/${ this.props.id }/view/`}>
-							View
+                        <button className="top-buttons btn btn-primary btn-sm pull-right"
+                            onClick={() => onPrevious()}><i className="fa fa-arrow-left"></i>{" Previous"}</button>
+                    </div>
+                </div>
+                <div className="row" style={{
+                    marginTop: "3%"
+                }}>
+                    <div className="col-xs-5 col-md-4">
+                        <h4>{'NavigationTools '}</h4>
+                    </div>
+                    <div className="col-xs-7 col-md-8">
+                        <a className={this.state.success || id
+                            ? "btn btn-primary btn-sm pull-right top-buttons"
+                            : "btn btn-primary btn-sm pull-right top-buttons disabled"}
+                            href={urls.viewURL(id)}>
+                            View
 						</a>
 
-						<a
-							style={{
-							display: "inline-block",
-							margin: "0px 3px 0px 3px"
-						}}
-							className={this.state.success === true
-							? "btn btn-primary btn-sm pull-right"
-							: "btn btn-primary btn-sm pull-right disabled"}
-							href={`/apps/appinstance/${ this.props.id }/`}
-							target={"_blank"}>
-							Details
+                        <a className={this.state.success ||id 
+                            ? "btn btn-primary btn-sm pull-right top-buttons"
+                            : "btn btn-primary btn-sm pull-right top-buttons disabled"}
+                            href={urls.detailsURL(id)}
+                            target={"_blank"}>
+                            Details
 						</a>
 
-						<button
-							style={{
-							display: "inline-block",
-							margin: "0px 3px 0px 3px"
-						}}
-							className={this.state.success === true
-							? "btn btn-primary btn-sm pull-right disabled"
-							: "btn btn-primary btn-sm pull-right"}
-							onClick={this.save.bind( this )}>Save</button>
+                        <button className={this.state.success===true
+                            ? "btn btn-primary btn-sm pull-right top-buttons disabled"
+                            : "btn btn-primary btn-sm top-buttons pull-right"}
+                            onClick={this.save.bind(this)}>Save</button>
 
-						<p
-							style={this.state.success == true
-							? {
-								display: "inline-block",
-								margin: "0px 3px 0px 3px",
-								float: "right"
-							}
-							: {
-								display: "none",
-								margin: "0px 3px 0px 3px",
-								float: "right"
-							}}>App instance successfully created!</p>
-					</div>
-				</div>
-				<hr></hr>
+                        <p className={this.state.success ? "top-buttons-right" : "top-buttons-right-hidden"}>
+                            App instance successfully created!</p>
+                    </div>
+                </div>
+                <hr></hr>
 
-				<Form
-					ref="form"
-					value={this.state.defaultConfig}
-					type={mapConfig}
-					options={options}/>
-			</div>
+                <Form
+                    ref="form"
+                    value={this.state.defaultConfig}
+                    type={mapConfig}
+                    options={options} />
+            </div>
         )
     }
+}
+NavigationTools.propTypes = {
+    urls: PropTypes.object.isRequired,
+    config: PropTypes.object,
+    onPrevious: PropTypes.func.isRequired,
+    onComplete: PropTypes.func.isRequired,
+    success: PropTypes.bool
 }

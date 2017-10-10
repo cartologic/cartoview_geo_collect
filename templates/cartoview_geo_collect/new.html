@@ -27,8 +27,35 @@
 {% block extra_script %}
     <script src="{{ STATIC_URL }}cartoview_geo_collect/dist/config.bundle.js?v={{v}}"></script>
     <script>
-    var username="{{request.user.username}}"
-    var viewer=new Viewer('root',{'urls':{'resources_url':"/api/maps","mapLayers":"/apps/maplayers/api","layerAttributes":"/apps/rest/app_manager/geonodelayerattribute/"},'limit':9},username);
+        const urls={
+          resources_url: "{% url 'api_dispatch_list' api_name='api' resource_name='maps' %}",
+          appInstance: null,
+          proxy: "{{ PROXY_URL }}",
+          geoserverUrl : "{{ GEOSERVER_BASE_URL }}",
+          static: "{{ STATIC_URL }}",
+          media: "{{ MEDIA_URL }}",
+          rest: "{% url 'app_manager_base_url' %}rest/app_manager/",
+          geonodeRest: "{% url 'api_api_top_level' 'api' %}",
+          appLogo:'{% static 'cartoview_geo_collect/logo.png' %}',
+          layerAttributes:"{% url 'app_manager_base_url' %}rest/app_manager/geonodelayerattribute/",
+          mapLayers:"{% url "cartoview_map_layers" %}",
+          newURL:"{% url "cartoview_geo_collect.new" %}",
+          editURL:function(id){
+            return "/apps/cartoview_geo_collect/"+id+"/edit/"
+          },
+          viewURL:function(id){
+            return "/apps/cartoview_geo_collect/"+id+"/view/"
+          },
+          detailsURL:function(id){
+            return "/apps/appinstance/"+id+"/"
+          },
+          describeFeatureType: function(typename){
+            return "{{ GEOSERVER_BASE_URL }}wfs?service=wfs&version=2.0.0&request=DescribeFeatureType&typeName="+typename+"&outputFormat=application/json"
+          }
+
+      }
+        var username="{{request.user.username}}"
+        var viewer=new Viewer('root',username,urls)
     viewer.view();
     </script>
     <div id="myModal" class="modal fade" role="dialog">
