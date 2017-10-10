@@ -30,8 +30,8 @@ export default class FieldConfigModal extends Component {
         this.options = this.props.options
     }
     componentDidMount() {
-        $(ReactDOM.findDOMNode(this)).modal('show')
-        $(ReactDOM.findDOMNode(this)).on('hidden.bs.modal', this.props
+        $(this.modal).modal('show')
+        $(this.modal).on('hidden.bs.modal', this.props
             .handleHideModal)
     }
     save = () => {
@@ -41,12 +41,12 @@ export default class FieldConfigModal extends Component {
         if (value) {
             // value here is an instance of Person
             this.props.updateAttribute(value)
-            $(ReactDOM.findDOMNode(this)).modal('hide')
+            $(this.modal).modal('hide')
         }
     }
     render() {
         return (
-            <div className="modal fade" tabIndex="-1" role="dialog">
+            <div ref={(modalRef)=>this.modal=modalRef} className="modal fade" tabIndex="-1" role="dialog">
                 <div className="modal-dialog" role="document">
                     <div className="modal-content">
                         <div className="modal-header">

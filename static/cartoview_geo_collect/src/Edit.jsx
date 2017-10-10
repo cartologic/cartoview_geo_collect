@@ -60,7 +60,7 @@ export default class Edit extends Component {
         this.goToStep( step -= 1 )
     }
     render( ) {
-        let { urls, username, keywords,currentLayer } = this.props
+        let { urls, username, keywords } = this.props
         var {
             step,
             selectedResource,
