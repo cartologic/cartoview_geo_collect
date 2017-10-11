@@ -36,7 +36,6 @@ class GeoCollect(StandardAppViews):
     def save(self, request, instance_id=None):
         res_json = dict(success=False)
         data = json.loads(request.body)
-        print(data)
         config = data.get('config', None)
         base64_image = config.get(
             'logo', None)

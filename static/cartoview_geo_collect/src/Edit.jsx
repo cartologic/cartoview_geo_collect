@@ -118,7 +118,6 @@ export default class Edit extends Component {
                     map: selectedResource,
                     config,
                     urls,
-                    currentLayer,
                     doDescribeFeatureType: this.doDescribeFeatureType,
                     onComplete: ( fieldConfig ) => {
                         let { step, config } = this.state
