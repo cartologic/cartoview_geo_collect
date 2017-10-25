@@ -51,7 +51,12 @@
               return "/apps/appinstance/"+id+"/"
             },
             describeFeatureType: function(typename){
+              {% if 'access_token' in request.session %}
+              return "{{ GEOSERVER_BASE_URL }}wfs?service=wfs&version=2.0.0&request=DescribeFeatureType&typeName="+typename+"&outputFormat=application/json&access_token={{request.session.access_token}}"
+              {% else %}
               return "{{ GEOSERVER_BASE_URL }}wfs?service=wfs&version=2.0.0&request=DescribeFeatureType&typeName="+typename+"&outputFormat=application/json"
+  
+              {% endif %}
             }
 
         }

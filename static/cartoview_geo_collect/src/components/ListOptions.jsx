@@ -97,20 +97,12 @@ export default class ListOptions extends Component {
 					<div className="col-xs-5 col-md-4"></div>
 					<div className="col-xs-7 col-md-8">
 						<button
-							style={{
-								display: "inline-block",
-								margin: "0px 3px 0px 3px"
-							}}
-							className="btn btn-primary btn-sm pull-right"
+							className="btn btn-primary navigation-buttons btn-sm pull-right"
 							onClick={this.handleSubmit.bind(this)}>{"next "}
 							<i className="fa fa-arrow-right"></i>
 						</button>
 						<button
-							style={{
-								display: "inline-block",
-								margin: "0px 3px 0px 3px"
-							}}
-							className="btn btn-primary btn-sm pull-right"
+							className="btn navigation-buttons btn-primary btn-sm pull-right"
 							onClick={() => this.props.onPrevious()}>
 							<i className="fa fa-arrow-left"></i>{" Previous"}</button>
 					</div>

@@ -1,7 +1,8 @@
-import React, { Component } from 'react';
-import Select from 'react-select'
+import "react-select/dist/react-select.min.css"
 
-import "react-select/dist/react-select.min.css";
+import React, { Component } from 'react'
+
+import Select from 'react-select'
 
 export default class Search extends Component {
 	constructor(props) {
@@ -50,14 +51,14 @@ export default class Search extends Component {
 	render() {
 		return (
 			<Select
-        name="form-field-name"
-        placeholder = "Search Maps"
-        value = {this.state.inputValue}
-        options={this.state.mapTypeNames!=undefined?this.state.mapTypeNames:[]}
-        onChange={(value)=>this.logChange(value)}
-        arrowRenderer = {()=> false}
-        noResultsText={'No Maps Found!!'}
-        />
+				name="form-field-name"
+				placeholder="Search Maps"
+				value={this.state.inputValue}
+				options={this.state.mapTypeNames != undefined ? this.state.mapTypeNames : []}
+				onChange={(value) => this.logChange(value)}
+				arrowRenderer={() => false}
+				noResultsText={'No Maps Found!!'}
+			/>
 		)
 	}
 }

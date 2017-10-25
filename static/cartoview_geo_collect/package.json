@@ -6,7 +6,7 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "build": "webpack -p --progress",
-    "dev": "webpack -d --config webpack.config-dev.js --watch --progress --color"
+    "dev": "webpack -d  --watch --progress --color"
   },
   "author": "cartologic",
   "license": "BSD-2-Clause",
@@ -51,6 +51,7 @@
     "babel-core": "^6.24.1",
     "babel-eslint": "^7.2.3",
     "babel-loader": "^7.0.0",
+    "babel-plugin-transform-object-rest-spread": "^6.26.0",
     "babel-preset-es2015": "^6.24.1",
     "babel-preset-react": "^6.24.1",
     "babel-preset-stage-1": "^6.24.1",

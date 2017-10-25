@@ -78,3 +78,7 @@ fieldset[disabled] .form-control {
     margin: 0px 3px 0px 3px;
     float: right;
 }
+.navigation-buttons{
+    display: inline-block;
+    margin: 0px 3px 0px 3px
+}

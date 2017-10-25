@@ -55,7 +55,6 @@ export default class General extends Component {
     }
     save( ) {
         var basicConfig = this.form.getValue( )
-        console.log(basicConfig)
         if ( basicConfig ) {
             this.props.onComplete( basicConfig )
         }
@@ -76,21 +75,13 @@ export default class General extends Component {
                     </div>
                     <div className="col-xs-7 col-md-8">
                         <button
-                            style={{
-                                display: "inline-block",
-                                margin: "0px 3px 0px 3px"
-                            }}
-                            className="btn btn-primary btn-sm pull-right"
+                            className="btn navigation-buttons btn-primary btn-sm pull-right"
                             onClick={this.save.bind(this)}>{"next "}
                             <i className="fa fa-arrow-right"></i>
                         </button>
 
                         <button
-                            style={{
-                                display: "inline-block",
-                                margin: "0px 3px 0px 3px"
-                            }}
-                            className="btn btn-primary btn-sm pull-right"
+                            className="btn navigation-buttons btn-primary btn-sm pull-right"
                             onClick={() => onPrevious()}>
                             <i className="fa fa-arrow-left"></i>{" Previous"}</button>
                     </div>

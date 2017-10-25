@@ -36,20 +36,12 @@ export default class ImageUploader extends React.Component {
                     </div>
                     <div className="col-xs-7 col-md-8">
                         <button
-                            style={{
-                                display: "inline-block",
-                                margin: "0px 3px 0px 3px"
-                            }}
-                            className="btn btn-primary btn-sm pull-right"
+                            className="btn navigation-buttons btn-primary btn-sm pull-right"
                             onClick={this.save}>{"next "}
                             <i className="fa fa-arrow-right"></i>
                         </button>
                         <button
-                            style={{
-                                display: "inline-block",
-                                margin: "0px 3px 0px 3px"
-                            }}
-                            className="btn btn-primary btn-sm pull-right"
+                            className="btn navigation-buttons btn-primary btn-sm pull-right"
                             onClick={() => this.props.onPrevious()}>
                             <i className="fa fa-arrow-left"></i>{" Previous"}</button>
                     </div>

@@ -3,12 +3,16 @@ import React, { Component } from 'react'
 import PropTypes from 'prop-types'
 import t from 'tcomb-form'
 
+const HomeButtonFunction = t.enums( {
+    instancePage: 'Instance Page',
+    appHome: 'App Home'
+} );
 const mapConfig = t.struct( {
+    HomeButtonFunction,
     showZoombar: t.Boolean,
     showLayerSwitcher: t.Boolean,
     showBaseMapSwitcher: t.Boolean,
-    showLegend: t.Boolean,
-    EnableGeolocation: t.Boolean
+    showLegend: t.Boolean
 } )
 const options = {
     fields: {
@@ -23,12 +27,16 @@ const options = {
         },
         showLegend: {
             label: "Legend"
-        },
-        EnableGeolocation: {
-            label: "GeoLocation"
         }
     }
-};
+}
+const getPropertyFromConfig = (config, property, defaultValue) => {
+    console.log(config)
+    const propertyValue = config[property] || config[property]===false ? config[property] : defaultValue
+    const nestedPropertyValue = config.config && config.config[property] ?
+        config.config[property] : propertyValue
+    return nestedPropertyValue
+}
 const Form = t.form.Form
 export default class NavigationTools extends Component {
     constructor( props ) {
@@ -36,35 +44,23 @@ export default class NavigationTools extends Component {
         const { config } = this.props
         this.state = {
             defaultConfig: {
-                showZoombar: config && config.config && config.config.showZoombar ?
-                    config.config.showZoombar : true,
-                showLayerSwitcher: config && config.config && config.config
-                    .showLayerSwitcher ? config.config.showLayerSwitcher : true,
-                showBaseMapSwitcher: config && config.config && config
-                    .config.showBaseMapSwitcher ? config.config.showBaseMapSwitcher : true,
-                showLegend: config && config.config && config.config.showLegend ?
-                    config.config.showLegend : true,
-                EnableGeolocation: config && config.config && config.config
-                    .EnableGeolocation ? config.config.EnableGeolocation : true,
+                showZoombar: getPropertyFromConfig(config,'showZoombar',true),
+                showLayerSwitcher: getPropertyFromConfig(config,'showLayerSwitcher',true),
+                showBaseMapSwitcher: getPropertyFromConfig(config,'showBaseMapSwitcher',true),
+                showLegend: getPropertyFromConfig(config,'showLegend',true),
+                HomeButtonFunction: getPropertyFromConfig(config,'HomeButtonFunction','instancePage'),
             }
         }
     }
     componentWillReceiveProps( nextProps ) {
-        this.setState( {
-            success: nextProps.success
+        this.setState( {success: nextProps.success
         } )
     }
     save( ) {
         var basicConfig = this.refs.form.getValue( )
         if ( basicConfig ) {
-            const properConfig = {
-                showZoombar: basicConfig.showZoombar,
-                showLayerSwitcher: basicConfig.showLayerSwitcher,
-                showBaseMapSwitcher: basicConfig.showBaseMapSwitcher,
-                showLegend: basicConfig.showLegend,
-                EnableGeolocation: basicConfig.EnableGeolocation
-            }
-            this.props.onComplete( properConfig )
+            this.setState({defaultConfig:basicConfig})
+            this.props.onComplete( basicConfig )
         }
     }
     render( ) {
