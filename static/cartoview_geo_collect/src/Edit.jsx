@@ -2,14 +2,14 @@ import './css/app.css'
 
 import React, { Component } from 'react'
 
-import FormFields from './components/FormFields'
-import General from './components/General.jsx'
-import ImageUploader from "./components/ImageUploader.jsx"
-import LayerSelector from "./components/LayerSelector.jsx"
-import NavigationTools from './components/NavigationTools.jsx'
-import Navigator from './components/Navigator.jsx'
+import FormFields from './components/edit/FormFields'
+import General from './components/edit/General.jsx'
+import ImageUploader from "./components/edit/ImageUploader.jsx"
+import LayerSelector from "./components/edit/LayerSelector.jsx"
+import NavigationTools from './components/edit/NavigationTools.jsx'
+import Navigator from './components/edit/Navigator.jsx'
 import PropTypes from 'prop-types'
-import ResourceSelector from './components/ResourceSelector.jsx'
+import ResourceSelector from './components/edit/ResourceSelector.jsx'
 import URLS from './utils/URLS'
 import { getCRSFToken } from './helpers/helpers.jsx'
 

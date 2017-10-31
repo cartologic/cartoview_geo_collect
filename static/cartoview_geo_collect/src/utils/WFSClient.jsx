@@ -56,8 +56,7 @@ class WFSClient {
         } );
     }
     insertFeature( typeName, properties, geometry ) {
-        const [ namespace, name ] = typeName.split( ":" );
-        console.log( namespace );
+        const [ namespace, name ] = typeName.split( ":" )
         const xml =
             `<Transaction xmlns="http://www.opengis.net/wfs" service="WFS" version="1.1.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.opengis.net/wfs http://schemas.opengis.net/wfs/1.1.0/wfs.xsd">
           <Insert>
@@ -70,7 +69,7 @@ class WFSClient {
               </${geometry.name}>
             </${name}>
           </Insert>
-        </Transaction>`;
+        </Transaction>`
         return this.sendXMLRequest( xml );
     }
     updateFeature( typeName, fid, properties, geometry ) {

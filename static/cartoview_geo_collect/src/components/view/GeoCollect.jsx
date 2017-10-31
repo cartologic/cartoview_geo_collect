@@ -1,4 +1,4 @@
-import '../css/geoform.css'
+import '../../css/geoform.css'
 
 import React, { Component } from 'react'
 
@@ -11,8 +11,8 @@ import InfoModal from './infoModal'
 import LocationForm from './LocationForm'
 import PropTypes from 'prop-types'
 import SavingPanel from './SavingPanel'
-import WFSClient from '../utils/WFSClient.jsx'
-import { getCRSFToken } from '../helpers/helpers.jsx'
+import WFSClient from '../../utils/WFSClient.jsx'
+import { getCRSFToken } from '../../helpers/helpers.jsx'
 import ol from 'openlayers'
 
 // check if number is int
@@ -213,7 +213,6 @@ class GeoCollect extends Component {
             file,
             showHistory
         } =this.state
-            console.log(urls)
         return (
             <div className="row" style={{ paddingTop: 50, paddingBottom: 50 }}>
                 {showHistory && <InfoModal layer={config.config.layer} close={this.hideInfoModal} urls={urls} />}

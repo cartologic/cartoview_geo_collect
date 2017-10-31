@@ -52,7 +52,7 @@ class MapViewer extends React.Component {
     onFeatureMove = (event) => {
         this.props.onFeatureMove(this.feature.getGeometry().getCoordinates())
     }
-    update(url,proxy) {
+    update(url, proxy) {
         if (url) {
             fetch(url, {
                 method: "GET",
@@ -65,7 +65,7 @@ class MapViewer extends React.Component {
                 if (config) {
                     MapConfigService.load(
                         MapConfigTransformService.transform(
-                            config), this.map,proxy)
+                            config), this.map, proxy)
                     this.feature.setGeometry(new ol.geom.Point(
                         this.map.getView().getCenter()
                     ))

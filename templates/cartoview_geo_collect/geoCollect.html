@@ -50,9 +50,15 @@
             historyListCreate: "{% url 'api_dispatch_list' api_name='collector_api' resource_name='collector_history' %}",
             geoserverUrl : "{{ GEOSERVER_BASE_URL }}",
             {% if 'access_token' in request.session %}
+            describeFeatureType: function(typename){
+                    return "{{ GEOSERVER_BASE_URL }}wfs?service=wfs&version=2.0.0&request=DescribeFeatureType&typeName="+typename+"&access_token={{request.session.access_token}}"
+            },
             wfsURL : "{{ GEOSERVER_BASE_URL }}wfs?access_token={{request.session.access_token}}",
             token:"{{request.session.access_token}}",
             {% else %}
+            describeFeatureType: function(typename){
+                    return "{{ GEOSERVER_BASE_URL }}wfs?service=wfs&version=2.0.0&request=DescribeFeatureType&typeName="+typename
+            },
             wfsURL : "{{ GEOSERVER_BASE_URL }}wfs",
             {% endif %}
             save:'{% url 'cartoview_geo_collect.edit' instance_id=instance.id %}',

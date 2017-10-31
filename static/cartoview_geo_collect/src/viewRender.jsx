@@ -1,4 +1,4 @@
-import GeoCollect from './components/GeoCollect'
+import GeoCollect from './components/view/GeoCollect'
 import React from 'react'
 import { getCRSFToken } from './helpers/helpers.jsx'
 import { render } from 'react-dom'
