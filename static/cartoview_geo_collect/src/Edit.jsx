@@ -10,7 +10,7 @@ import NavigationTools from './components/edit/NavigationTools.jsx'
 import Navigator from './components/edit/Navigator.jsx'
 import PropTypes from 'prop-types'
 import ResourceSelector from './components/edit/ResourceSelector.jsx'
-import URLS from './utils/URLS'
+import URLS from 'Source/containers/URLS'
 import { getCRSFToken } from './helpers/helpers.jsx'
 
 export default class Edit extends Component {
@@ -198,7 +198,6 @@ export default class Edit extends Component {
                     success,
                     id: id,
                     onComplete: (basicConfig) => {
-                        console.log(basicConfig)
                         var { config } = this.state
                         const instanceConfig = {
                             ...config,

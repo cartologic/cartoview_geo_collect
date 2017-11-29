@@ -11,9 +11,8 @@
     <meta name="viewport" content="width=device-width,initial-scale=1.0, maximum-scale=1, user-scalable=no" />    
     <link rel="shortcut icon" type="image/png" href="{{ STATIC_URL }}cartoview/img/icon.png" />
     <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css" integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
-    
     <!-- Optional theme -->
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+    <!-- <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap-theme.min.css" integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous"> -->
     <style>
         html,body {
             height: 100%;
@@ -39,13 +38,19 @@
     integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
     crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js" integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa" crossorigin="anonymous"></script>
-<script src="{{ STATIC_URL }}cartoview_geo_collect/dist/geoCollect.bundle.js?v={{v}}"></script>
+    <script src="{{ STATIC_URL }}cartoview_geo_collect/dist/commons.js?v={{v}}"></script>
+    <script src="{{ STATIC_URL }}cartoview_geo_collect/dist/geoCollect.bundle.js?v={{v}}"></script>
 <script>
     {% if instance %}
         var instanceId= {{ instance.id }}
+        {% if PROXY_URL %}
+                const PROXY_URL='{{PROXY_URL}}'
+        {% else %}
+                const PROXY_URL=null
+        {% endif %}
         const urls={
             mapJsonUrl: "{% url 'map_json' mapid=instance.map.id %}",
-            proxy: "{{ PROXY_URL }}",
+            proxy: PROXY_URL,
             appInstance: "{% url 'api_dispatch_detail' api_name='api' resource_name='appinstances' pk=instance.id %}",
             historyListCreate: "{% url 'api_dispatch_list' api_name='collector_api' resource_name='collector_history' %}",
             geoserverUrl : "{{ GEOSERVER_BASE_URL }}",

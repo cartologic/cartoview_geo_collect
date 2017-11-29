@@ -1,6 +1,6 @@
 import Edit from './Edit.jsx'
 import React from 'react'
-import { getCRSFToken } from './helpers/helpers.jsx'
+import { getCRSFToken } from 'Source/helpers/helpers.jsx'
 import { render } from 'react-dom'
 class Viewer {
     constructor( domId, username, urls ) {
