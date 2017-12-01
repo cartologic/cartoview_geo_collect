@@ -20,7 +20,7 @@ export const Header = (props) => {
         <div className="collector-title">
             <div className="col-xs-4 col-sm-2 col-md-2 vcenter">
                 <Img src={[
-                    config.config.logo ? config.config.logo : "",
+                    config.config.logo ? config.config.logo.base64 : "",
                     config.map.thumbnail_url,
                     Logo
                 ]}

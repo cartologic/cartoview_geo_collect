@@ -4,6 +4,7 @@ import Image from 'Source/img/marker.png'
 import Stroke from 'ol/style/stroke'
 import Style from 'ol/style/style'
 import Text from 'ol/style/text'
+
 class StyleHelper {
     getMarker = () => {
         const marker = new Style({
@@ -26,7 +27,7 @@ class StyleHelper {
                 textAlign: 'center',
                 offsetY: -20,
                 font: '18px serif'
-            }),
+            })
         })
         return marker
     }

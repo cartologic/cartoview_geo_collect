@@ -4,6 +4,7 @@ import Feature from 'ol/feature'
 import LayerHelper from 'Source/helpers/LayersHelper'
 import Map from 'ol/map'
 import Modify from 'ol/interaction/modify'
+import MultiPoint from 'ol/geom/multipoint'
 import OSM from 'ol/source/osm'
 import Point from 'ol/geom/point'
 import StyleHelper from 'Source/helpers/StyleHelper'
@@ -17,25 +18,27 @@ import interaction from 'ol/interaction'
 import proj from 'ol/proj'
 import proj4 from 'proj4'
 import t from 'tcomb-form'
-
+const FeatureTypeMapping = {
+    'Point': Point,
+    'MultiPoint': MultiPoint,
+}
 const Int = t.refinement(t.Number, (n) => n % 1 == 0)
 class GeoCollectHelper {
     getCenterOfExtent = (ext) => {
         const center = extent.getCenter(ext)
         return center
     }
-    getPointGeomerty = (coordinates) => {
-        let point = new Point(coordinates)
+    getGeomerty = (coordinates, geometryType) => {
+        let point = new FeatureTypeMapping[geometryType](geometryType === "Point" ? coordinates : [coordinates, coordinates], 'XY')
         return point
     }
-    getPointFeature = (position,geometryName="the_geom") => {
+    getPointFeature = (position, geometryName = "the_geom", geometryType = "Point") => {
         let feature = new Feature({})
         feature.setGeometryName(geometryName)
-        feature.setGeometry(this.getPointGeomerty(position))
+        feature.setGeometry(this.getGeomerty(position, geometryType))
         return feature
     }
-    wfsTransaction = (feature, layerName,targetNameSpace, crs) => {
-        console.log(targetNameSpace) 
+    wfsTransaction = (feature, layerName, targetNameSpace, crs) => {
         let formatWFS = new WFS
         var formatGMLOptions = {
             featureNS: targetNameSpace,
@@ -44,7 +47,6 @@ class GeoCollectHelper {
             gmlOptions: {
                 srsName: `${crs}`
             },
-            // srsName:"EPSG:"+crsCode
         }
         const node = formatWFS.writeTransaction([feature], null, null, formatGMLOptions)
         var serializer = new XMLSerializer()
@@ -77,12 +79,11 @@ class GeoCollectHelper {
     }
 
     getVectorLayer = (feature) => {
-        let featureStyle = StyleHelper.getMarker()
         let vectorLayer = new Vector({
             source: new VectorSource({
                 features: [feature]
             }),
-            style: featureStyle,
+            style: StyleHelper.getMarker(),
         })
         return vectorLayer
     }

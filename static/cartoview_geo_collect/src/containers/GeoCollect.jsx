@@ -27,6 +27,7 @@ class GeoCollectContainer extends Component {
             targetNameSpace: null,
             saving: false,
             geometryName: null,
+            geometryType: null,
             selectionLayer: false,
             map: GeoCollectHelper.getMap()
         }
@@ -47,7 +48,7 @@ class GeoCollectContainer extends Component {
             layer: config.config.layer,
             data: value,
         })
-        fetch(urls.historyListCreate, {
+        fetch(url, {
             method: 'POST',
             credentials: "same-origin",
             headers: new Headers({
@@ -63,9 +64,9 @@ class GeoCollectContainer extends Component {
             )
         })
     }
-    showHistoryModal=()=>{
-        let {showHistory}=this.state
-        this.setState({showHistory:!showHistory})
+    showHistoryModal = () => {
+        let { showHistory } = this.state
+        this.setState({ showHistory: !showHistory })
     }
     saveAttachments = (featureId) => {
         let { file } = this.state
@@ -126,8 +127,8 @@ class GeoCollectContainer extends Component {
         })
     }
     changeLocationValue = (locationValue) => {
-        let { feature } = this.state
-        feature.setGeometry(GeoCollectHelper.getPointGeomerty([locationValue.x, locationValue.y]))
+        let { feature,geometryType } = this.state
+        feature.setGeometry(GeoCollectHelper.getGeomerty([locationValue.x, locationValue.y],geometryType))
         this.setState({ locationValue })
     }
     componentWillMount() {
@@ -136,8 +137,11 @@ class GeoCollectContainer extends Component {
         this.setState({ ...form })
     }
     onFeatureMove = (event) => {
-        let { feature } = this.state
+        let { feature,geometryType} = this.state
         let location = feature.getGeometry().getCoordinates()
+        if(geometryType==="MultiPoint"){
+            location=location[0]
+        }
         this.setState({
             locationValue: {
                 x: location[0],
@@ -165,7 +169,8 @@ class GeoCollectContainer extends Component {
                 if (attribute.type.includes("gml:")) {
                     const data = {
                         targetNameSpace: result.targetNamespace,
-                        geometryName: attribute.name
+                        geometryName: attribute.name,
+                        geometryType: attribute.type.split(":").pop()
                     }
                     this.setState({ ...data }, () => this.onMapReady(map.getView().getCenter()))
                 }
@@ -173,12 +178,12 @@ class GeoCollectContainer extends Component {
         })
     }
     onMapReady = (center) => {
-        let { map, selectionLayer, geometryName } = this.state
+        let { map, selectionLayer, geometryName, geometryType } = this.state
         let locationValue = {
             x: center[0],
             y: center[1]
         }
-        let feature = GeoCollectHelper.getPointFeature(center, geometryName)
+        let feature = GeoCollectHelper.getPointFeature(center, geometryName, geometryType)
         let layer = GeoCollectHelper.getVectorLayer(feature)
         let interaction = GeoCollectHelper.getModifyInteraction(feature)
         if (!selectionLayer) {
@@ -217,7 +222,7 @@ class GeoCollectContainer extends Component {
             changeLocationValue: this.changeLocationValue,
             mapInit: this.mapInit,
             saveAll: this.saveAll,
-            showHistoryModal:this.showHistoryModal
+            showHistoryModal: this.showHistoryModal
         }
         return props
     }
