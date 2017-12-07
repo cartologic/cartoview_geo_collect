@@ -1,7 +1,6 @@
 import React, { Component } from 'react'
 
 import PropTypes from 'prop-types'
-import ReactDOM from 'react-dom'
 import t from 'tcomb-form'
 
 const Form = t.form.Form
@@ -35,11 +34,8 @@ export default class FieldConfigModal extends Component {
             .handleHideModal)
     }
     save = () => {
-        // call getValue() to get the values of the form
-        var value = this.refs.form.getValue()
-        // if validation fails, value will be null
+        var value = this.form.getValue()
         if (value) {
-            // value here is an instance of Person
             this.props.updateAttribute(value)
             $(this.modal).modal('hide')
         }
@@ -53,11 +49,11 @@ export default class FieldConfigModal extends Component {
                             <button type="button" className="close" data-dismiss="modal" aria-label="Close">
                                 <span aria-hidden="true">&times;</span>
                             </button>
-                            <h4 className="modal-title">{"Options"}</h4>
+                            <h4 className="modal-title">{"Configure the Field"}</h4>
                         </div>
                         <div className="modal-body">
                             <Form
-                                ref="form"
+                                ref={(formRef)=>this.form=formRef}
                                 type={this.props.fieldConfig}
                                 value={this.props.defaultValue}
                                 options={this.options} />
