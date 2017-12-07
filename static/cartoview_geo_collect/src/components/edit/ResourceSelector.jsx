@@ -3,15 +3,17 @@ import 'react-toggle-switch/dist/css/switch.min.css'
 import React, { Component } from 'react';
 
 import Img from 'react-image';
+import {Loader} from 'Source/components/edit/CommonComponents'
 import ReactPaginate from 'react-paginate';
 import Search from "./Search.jsx";
 import Spinner from 'react-spinkit'
 import Switch from 'react-toggle-switch'
+
 export default class ResourceSelector extends Component {
     constructor( props ) {
         super( props );
         this.state = {
-            resources: [ ],
+            resources: [],
             loading: true,
             showPagination: true,
             pageCount: 0,
@@ -26,7 +28,7 @@ export default class ResourceSelector extends Component {
         let userMapsFilter = this.state.mymaps ? ( "&owner__username=" +
             this.props.username + "" ) : "";
         fetch( this.props.resourcesUrl + "?limit=" + limit + "&offset=" +
-                offset + userMapsFilter ).then( ( response ) => response.json( ) )
+                offset + userMapsFilter ).then( ( response ) => response.json() )
             .then( ( data ) => {
                 this.setState( {
                     resources: data.objects,
@@ -38,7 +40,7 @@ export default class ResourceSelector extends Component {
                 console.error( error );
             } );
     }
-    componentDidMount( ) {
+    componentDidMount() {
         this.loadResources( 0 )
     }
     handlePageClick = ( data ) => {
@@ -46,19 +48,19 @@ export default class ResourceSelector extends Component {
         const offset = data.selected * this.props.limit;
         this.loadResources( offset )
     };
-    handleUserMapsChecked( ) {
+    handleUserMapsChecked() {
         const flag_maps = this.state.mymaps
         this.setState( {
             mymaps: !flag_maps
-        }, ( ) => {
+        }, () => {
             this.props.selectMap( undefined )
             this.loadResources( 0 )
         } );
     }
     searchResources( mapTitle ) {
         if ( mapTitle ) {
-            let url = `/api/maps/?&title__icontains=${ mapTitle }`
-            fetch( url, { credentials: 'include' } ).then( ( res ) => res.json( ) )
+            let url = `/api/maps/?&title__icontains=${mapTitle}`
+            fetch( url, { credentials: 'include' } ).then( ( res ) => res.json() )
                 .then( ( resources ) => {
                     this.setState( {
                         resources: resources.objects,
@@ -69,24 +71,24 @@ export default class ResourceSelector extends Component {
             // clear button
             this.setState( {
                 showPagination: true
-            }, ( ) => this.loadResources( ) )
+            }, () => this.loadResources() )
         }
     }
-    handleSearch( ) {
+    handleSearch() {
         if ( this.refs.search.value != '' ) {
             this.setState( { loading: true } );
             let userMapsFilter = this.state.mymaps ? ( "&owner__username=" +
                 this.props.username + "" ) : "";
             fetch( this.props.resourcesUrl + "?title__icontains=" + this.refs
                 .search.value + userMapsFilter ).then( ( response ) =>
-                response.json( ) ).then( ( data ) => {
+                response.json() ).then( ( data ) => {
                 this.setState( { resources: data.objects, loading: false } )
             } ).catch( ( error ) => {
                 console.error( error );
             } );
         }
     }
-    render( ) {
+    render() {
         let { selectedResource } = this.props
         let { loading } = this.state
         return (
@@ -96,28 +98,28 @@ export default class ResourceSelector extends Component {
 						<h4>{'Select Map'}</h4>
 					</div>
 					<div className="col-xs-7 col-md-8">
-						{( selectedResource
+						{(selectedResource
 							? selectedResource
-							: false )
+							: false)
 							? <button
-									style={{
+								style={{
 									display: "inline-block",
 									margin: "0px 3px 0px 3px"
 								}}
-									className={loading ? "btn btn-primary btn-sm pull-right disabled" :"btn btn-primary btn-sm pull-right"}
-									onClick={( ) => this.props.onComplete( )}>{"next "}
-									<i className="fa fa-arrow-right"></i>
-								</button>
-							: <button
-								style={{
-								display: "inline-block",
-								margin: "0px 3px 0px 3px"
-							}}
-								className="btn btn-primary btn-sm pull-right disabled"
-								onClick={( ) => this.props.onComplete( )}>{"next "}
+								className={loading ? "btn btn-primary btn-sm pull-right disabled" : "btn btn-primary btn-sm pull-right"}
+								onClick={() => this.props.onComplete()}>{"next "}
 								<i className="fa fa-arrow-right"></i>
 							</button>
-}
+							: <button
+								style={{
+									display: "inline-block",
+									margin: "0px 3px 0px 3px"
+								}}
+								className="btn btn-primary btn-sm pull-right disabled"
+								onClick={() => this.props.onComplete()}>{"next "}
+								<i className="fa fa-arrow-right"></i>
+							</button>
+						}
 					</div>
 				</div>
 				<hr></hr>
@@ -128,15 +130,15 @@ export default class ResourceSelector extends Component {
 					<div
 						className="col-xs-12 col-sm-6 col-md-4 col-lg-4"
 						style={{
-						display: 'flex'
-					}}>
+							display: 'flex'
+						}}>
 						<span style={{
 							fontWeight: 500,
 							marginRight: 10
 						}}>{'All Maps'}</span>
 						<Switch
 							on={this.state.mymaps}
-							onClick={this.handleUserMapsChecked.bind( this )}/>
+							onClick={this.handleUserMapsChecked.bind(this)} />
 						<span style={{
 							fontWeight: 500,
 							marginLeft: 10
@@ -146,35 +148,32 @@ export default class ResourceSelector extends Component {
 					<div className="col-xs-12 col-sm-6 col-md-8 col-lg-8">
 						<Search
 							username=
-							{this.state.mymaps===true?this.props.username:null}
-							searchResources={( mapTitle ) => {
-							this.searchResources( mapTitle )
-						}}/>
+							{this.state.mymaps === true ? this.props.username : null}
+							searchResources={(mapTitle) => {
+								this.searchResources(mapTitle)
+							}} />
 					</div>
 				</div>
 
-				{( !this.state.resources || this.state.loading ) && <div className="row">
-					<div
-						className="col-xs-12 col-sm-12 col-md-6 col-lg-6 col-md-offset-3 text-center"><Spinner name="line-scale-pulse-out" color="steelblue"/></div>
-				</div>}
+				{(!this.state.resources || this.state.loading) && <Loader/>}
 
-				{!this.state.loading && this.state.resources.map(( resource ) => {
+				{!this.state.loading && this.state.resources.map((resource) => {
 					return (
 						<div
-							onClick={( ) => this.props.selectMap( resource )}
+							onClick={() => this.props.selectMap(resource)}
 							key={resource.id}
-							className={( selectedResource
-							? ( selectedResource && selectedResource.id == resource.id )
-							: false )
-							? "row resource-box bg-success"
-							: "row resource-box"}>
+							className={(selectedResource
+								? (selectedResource && selectedResource.id == resource.id)
+								: false)
+								? "row resource-box bg-success"
+								: "row resource-box"}>
 
 							<div
 								className="col-xs-12 col-sm-4 col-md-4 col-lg-4 resource-box-img-container">
 								<Img
 									className="resource-box-img img-responsive"
-									src={[ resource.thumbnail_url, "/static/app_manager/img/no-image.jpg" ]}
-									loader={< Spinner name = "line-scale-pulse-out" color = "steelblue" />}/>
+									src={[resource.thumbnail_url, "/static/app_manager/img/no-image.jpg"]}
+									loader={< Spinner name="line-scale-pulse-out" color="steelblue" />} />
 							</div>
 
 							<div className="col-xs-12 col-sm-8 col-md-8 col-lg-8 resource-box-text">
@@ -184,7 +183,7 @@ export default class ResourceSelector extends Component {
 								<hr></hr>
 								<p>
 									{resource.abstract.length > 30
-										? resource.abstract.substr( 0, 30 ) + '...'
+										? resource.abstract.substr(0, 30) + '...'
 										: resource.abstract}
 								</p>
 								<div className="row">
@@ -194,13 +193,13 @@ export default class ResourceSelector extends Component {
 									<div className="col-md-8">
 										<a
 											type="button"
-											href={`/maps/${ resource.id }`}
+											href={`/maps/${resource.id}`}
 											target="_blank"
 											className="btn btn-primary"
 											style={{
-											margin: "5px",
-											float: "right"
-										}}>
+												margin: "5px",
+												float: "right"
+											}}>
 											Map Details
 										</a>
 									</div>
@@ -210,7 +209,7 @@ export default class ResourceSelector extends Component {
 					)
 				})}
 
-				{( !this.state.loading && this.state.resources.length == 0 && this.state.mymaps ) && <div className="row">
+				{(!this.state.loading && this.state.resources.length == 0 && this.state.mymaps) && <div className="row">
 					<div
 						className="col-xs-12 col-sm-12 col-md-6 col-lg-6 col-md-offset-3 col-lg-offset-3 text-center">
 						<h3>{'You have not created  any maps! please create a Map'}</h3>
@@ -220,7 +219,7 @@ export default class ResourceSelector extends Component {
 				<ReactPaginate
 					previousLabel={"previous"}
 					nextLabel={"next"}
-					breakLabel={< a href = "javascript:;" > ...</a>}
+					breakLabel={< a href="javascript:;" > ...</a>}
 					breakClassName={"break-me"}
 					pageCount={this.state.pageCount}
 					marginPagesDisplayed={2}
@@ -228,7 +227,7 @@ export default class ResourceSelector extends Component {
 					onPageChange={this.handlePageClick}
 					containerClassName={"pagination"}
 					subContainerClassName={"pages pagination"}
-					activeClassName={"active"}/>
+					activeClassName={"active"} />
 			</div>
         )
     }

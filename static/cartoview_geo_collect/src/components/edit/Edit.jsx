@@ -1,23 +1,23 @@
-import './css/app.css'
+import 'Source/css/app.css'
 
 import React, { Component } from 'react'
 
-import FormFields from './components/edit/FormFields'
-import General from './components/edit/General.jsx'
-import ImageUploader from "./components/edit/ImageUploader.jsx"
-import LayerSelector from "./components/edit/LayerSelector.jsx"
-import NavigationTools from './components/edit/NavigationTools.jsx'
-import Navigator from './components/edit/Navigator.jsx'
+import FormFields from 'Source/components/edit/FormFields'
+import General from 'Source/components/edit/General.jsx'
+import ImageUploader from "Source/components/edit/ImageUploader.jsx"
+import LayerSelector from "Source/components/edit/LayerSelector.jsx"
+import NavigationTools from 'Source/components/edit/NavigationTools.jsx'
+import Navigator from 'Source/components/edit/Navigator.jsx'
 import PropTypes from 'prop-types'
-import ResourceSelector from './components/edit/ResourceSelector.jsx'
+import ResourceSelector from 'Source/components/edit/ResourceSelector.jsx'
 import URLS from 'Source/containers/URLS'
-import { getCRSFToken } from './helpers/helpers.jsx'
+import { getCRSFToken } from 'Source/helpers/helpers.jsx'
 
 export default class Edit extends Component {
-    constructor(props) {
-        super(props)
+    constructor( props ) {
+        super( props )
         const { config, urls } = this.props
-        this.urls = new URLS(urls)
+        this.urls = new URLS( urls )
         this.state = {
             step: 0,
             title: config ? config.title : null,
@@ -27,42 +27,40 @@ export default class Edit extends Component {
             id: config ? config.id : null
         }
     }
-    goToStep(step) {
-        this.setState({ step })
+    goToStep( step ) {
+        this.setState( { step } )
     }
-    doDescribeFeatureType = (typename) => {
+    doDescribeFeatureType = ( typename ) => {
         let { urls } = this.props
-        const url = urls.describeFeatureType(typename)
-        const proxiedURL = this.urls.getProxiedURL(url)
-
-        return fetch(proxiedURL).then(
-            (response) => response.json())
+        const url = urls.describeFeatureType( typename )
+        const proxiedURL = this.urls.getProxiedURL( url )
+        return fetch( proxiedURL ).then(
+            ( response ) => response.json() )
     }
-    save = (instanceConfig) => {
-        const { config } = this.state
+    save = ( instanceConfig ) => {
         const { urls } = this.props
         const { id } = this.state
-        const url = id ? urls.editURL(id) : urls.newURL
-        this.setState({
+        const url = id ? urls.editURL( id ) : urls.newURL
+        this.setState( {
             config: instanceConfig
-        })
-        fetch(url, {
+        } )
+        fetch( url, {
             method: 'POST',
             credentials: "same-origin",
-            headers: new Headers({ "Content-Type": "application/json; charset=UTF-8", "X-CSRFToken": getCRSFToken() }),
-            body: JSON.stringify(instanceConfig)
-        }).then((response) => response.json()).then(result => {
-            if (result.success === true) {
-                this.setState({
+            headers: new Headers( { "Content-Type": "application/json; charset=UTF-8", "X-CSRFToken": getCRSFToken() } ),
+            body: JSON.stringify( instanceConfig )
+        } ).then( ( response ) => response.json() ).then( result => {
+            if ( result.success === true ) {
+                this.setState( {
                     success: true,
                     id: result.id
-                })
+                } )
             }
-        })
+        } )
     }
     onPrevious() {
         let { step } = this.state
-        this.goToStep(step -= 1)
+        this.goToStep( step -= 1 )
     }
     render() {
         let { urls, username, keywords } = this.props
@@ -83,19 +81,18 @@ export default class Edit extends Component {
                     resourcesUrl: urls.resources_url,
                     username: username,
                     selectedResource: selectedResource,
-                    selectMap: (resource) => {
-                        this.setState({ selectedResource: resource })
+                    selectMap: ( resource ) => {
+                        this.setState( { selectedResource: resource } )
                     },
                     limit: 9,
                     onComplete: () => {
                         var { step, config } = this.state
-                        this.setState({
-                            config: {
-                                ...config,
+                        this.setState( {
+                            config: { ...config,
                                 map: selectedResource.id
                             }
-                        })
-                        this.goToStep(++step)
+                        } )
+                        this.goToStep( ++step )
                     }
                 }
             }, {
@@ -105,14 +102,13 @@ export default class Edit extends Component {
                     map: selectedResource,
                     config,
                     urls,
-                    onComplete: (listConfig) => {
+                    onComplete: ( listConfig ) => {
                         let { step, config } = this.state
-                        this.setState({
-                            config: {
-                                ...config,
+                        this.setState( {
+                            config: { ...config,
                                 ...listConfig
                             }
-                        }, this.goToStep(++step))
+                        }, this.goToStep( ++step ) )
                     },
                     onPrevious: () => {
                         this.onPrevious()
@@ -126,17 +122,15 @@ export default class Edit extends Component {
                     config,
                     urls,
                     doDescribeFeatureType: this.doDescribeFeatureType,
-                    onComplete: (fieldConfig) => {
+                    onComplete: ( fieldConfig ) => {
                         let { step, config } = this.state
-                        this.setState({
-                            config: {
-                                ...config,
-                                config: {
-                                    ...config.config,
+                        this.setState( {
+                            config: { ...config,
+                                config: { ...config.config,
                                     ...fieldConfig
                                 }
                             }
-                        }, this.goToStep(++step))
+                        }, this.goToStep( ++step ) )
                     },
                     onPrevious: () => {
                         this.onPrevious()
@@ -148,17 +142,15 @@ export default class Edit extends Component {
                 props: {
                     config,
                     urls,
-                    onComplete: (Image) => {
+                    onComplete: ( Image ) => {
                         let { step, config } = this.state
-                        this.setState({
-                            config: {
-                                ...config,
-                                config: {
-                                    ...config.config,
+                        this.setState( {
+                            config: { ...config,
+                                config: { ...config.config,
                                     ...Image
                                 }
                             }
-                        }, this.goToStep(++step))
+                        }, this.goToStep( ++step ) )
                     },
                     onPrevious: () => {
                         this.onPrevious()
@@ -174,15 +166,14 @@ export default class Edit extends Component {
                     title,
                     selectedResource,
                     config,
-                    onComplete: (basicConfig) => {
+                    onComplete: ( basicConfig ) => {
                         let { step, config } = this.state
-                        this.setState({
-                            config: {
-                                ...config,
+                        this.setState( {
+                            config: { ...config,
                                 ...basicConfig
                             }
-                        })
-                        this.goToStep(++step)
+                        } )
+                        this.goToStep( ++step )
                     },
                     onPrevious: () => {
                         this.onPrevious()
@@ -197,22 +188,20 @@ export default class Edit extends Component {
                     urls,
                     success,
                     id: id,
-                    onComplete: (basicConfig) => {
+                    onComplete: ( basicConfig ) => {
                         var { config } = this.state
-                        const instanceConfig = {
-                            ...config,
-                            config: {
-                                ...config.config,
+                        const instanceConfig = { ...config,
+                            config: { ...config.config,
                                 ...basicConfig
                             }
                         }
-                        this.save(instanceConfig)
+                        this.save( instanceConfig )
                     },
                     onPrevious: () => {
                         this.onPrevious()
                     }
                 }
-            }]
+            } ]
         return (
             <div className="wrapping">
                 <Navigator

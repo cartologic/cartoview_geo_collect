@@ -1,4 +1,4 @@
-import Edit from './Edit.jsx'
+import Edit from './components/edit/Edit'
 import React from 'react'
 import { getCRSFToken } from 'Source/helpers/helpers.jsx'
 import { render } from 'react-dom'
