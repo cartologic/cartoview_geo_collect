@@ -1,14 +1,13 @@
 import 'react-toggle-switch/dist/css/switch.min.css'
 
-import React, { Component } from 'react';
+import React, { Component } from 'react'
 
-import Img from 'react-image';
-import {Loader} from 'Source/components/edit/CommonComponents'
-import ReactPaginate from 'react-paginate';
-import Search from "./Search.jsx";
+import Img from 'react-image'
+import { Loader } from 'Source/components/edit/CommonComponents'
+import ReactPaginate from 'react-paginate'
+import Search from "./Search.jsx"
 import Spinner from 'react-spinkit'
 import Switch from 'react-toggle-switch'
-
 export default class ResourceSelector extends Component {
     constructor( props ) {
         super( props );
@@ -22,30 +21,31 @@ export default class ResourceSelector extends Component {
     }
     loadResources( off ) {
         this.setState( { loading: true } )
-        const limit = typeof ( this.props.limit ) === "undefined" ? 100 :
-            this.props.limit;
-        const offset = typeof ( off ) === "undefined" ? 0 : off;
-        let userMapsFilter = this.state.mymaps ? ( "&owner__username=" +
-            this.props.username + "" ) : "";
-        fetch( this.props.resourcesUrl + "?limit=" + limit + "&offset=" +
+        let { mymaps } = this.state
+        const { username, resourcesUrl, limit } = this.props
+        const resultLimit = typeof ( limit ) === "undefined" ? 100 : this.props
+            .limit
+        const offset = typeof ( off ) === "undefined" ? 0 : off
+        let userMapsFilter = mymaps ? ( "&owner__username=" + username +
+            "" ) : "";
+        fetch( resourcesUrl + "?limit=" + resultLimit + "&offset=" +
                 offset + userMapsFilter ).then( ( response ) => response.json() )
             .then( ( data ) => {
                 this.setState( {
                     resources: data.objects,
                     pageCount: Math.ceil( data.meta.total_count /
-                        limit ),
+                        resultLimit ),
                     loading: false
                 } )
             } ).catch( ( error ) => {
-                console.error( error );
-            } );
+                console.error( error )
+            } )
     }
     componentDidMount() {
         this.loadResources( 0 )
     }
     handlePageClick = ( data ) => {
-        let selected = data.selected;
-        const offset = data.selected * this.props.limit;
+        const offset = data.selected * this.props.limit
         this.loadResources( offset )
     };
     handleUserMapsChecked() {
@@ -84,13 +84,13 @@ export default class ResourceSelector extends Component {
                 response.json() ).then( ( data ) => {
                 this.setState( { resources: data.objects, loading: false } )
             } ).catch( ( error ) => {
-                console.error( error );
-            } );
+                console.error( error )
+            } )
         }
     }
     render() {
-        let { selectedResource } = this.props
-        let { loading } = this.state
+        let { selectedResource, onComplete } = this.props
+        let { loading, resources, mymaps } = this.state
         return (
             <div>
 				<div className="row">
@@ -107,7 +107,7 @@ export default class ResourceSelector extends Component {
 									margin: "0px 3px 0px 3px"
 								}}
 								className={loading ? "btn btn-primary btn-sm pull-right disabled" : "btn btn-primary btn-sm pull-right"}
-								onClick={() => this.props.onComplete()}>{"next "}
+								onClick={() => onComplete()}>{"next "}
 								<i className="fa fa-arrow-right"></i>
 							</button>
 							: <button
@@ -116,7 +116,7 @@ export default class ResourceSelector extends Component {
 									margin: "0px 3px 0px 3px"
 								}}
 								className="btn btn-primary btn-sm pull-right disabled"
-								onClick={() => this.props.onComplete()}>{"next "}
+								onClick={() => onComplete()}>{"next "}
 								<i className="fa fa-arrow-right"></i>
 							</button>
 						}
@@ -124,25 +124,17 @@ export default class ResourceSelector extends Component {
 				</div>
 				<hr></hr>
 
-				<div className="row" style={{
-					paddingBottom: 10
-				}}>
-					<div
-						className="col-xs-12 col-sm-6 col-md-4 col-lg-4"
-						style={{
-							display: 'flex'
-						}}>
-						<span style={{
-							fontWeight: 500,
-							marginRight: 10
-						}}>{'All Maps'}</span>
+				<div className="row" style={{ paddingBottom: 10 }}>
+					<div className="col-xs-12 col-sm-6 col-md-4 col-lg-4" style={{ display: 'flex' }}>
+						<span style={{ fontWeight: 500, marginRight: 10 }}>
+							{'All Maps'}
+						</span>
 						<Switch
 							on={this.state.mymaps}
 							onClick={this.handleUserMapsChecked.bind(this)} />
-						<span style={{
-							fontWeight: 500,
-							marginLeft: 10
-						}}>{'My Maps'}</span>
+						<span style={{ fontWeight: 500, marginLeft: 10 }}>
+							{'My Maps'}
+						</span>
 					</div>
 
 					<div className="col-xs-12 col-sm-6 col-md-8 col-lg-8">
@@ -155,9 +147,9 @@ export default class ResourceSelector extends Component {
 					</div>
 				</div>
 
-				{(!this.state.resources || this.state.loading) && <Loader/>}
+				{(!resources || loading) && <Loader />}
 
-				{!this.state.loading && this.state.resources.map((resource) => {
+				{!loading && resources.map((resource) => {
 					return (
 						<div
 							onClick={() => this.props.selectMap(resource)}
@@ -177,9 +169,7 @@ export default class ResourceSelector extends Component {
 							</div>
 
 							<div className="col-xs-12 col-sm-8 col-md-8 col-lg-8 resource-box-text">
-								<h4 style={{
-									marginTop: "2%"
-								}}>{resource.title}</h4>
+								<h4 style={{ marginTop: "2%" }}>{resource.title}</h4>
 								<hr></hr>
 								<p>
 									{resource.abstract.length > 30
@@ -196,10 +186,7 @@ export default class ResourceSelector extends Component {
 											href={`/maps/${resource.id}`}
 											target="_blank"
 											className="btn btn-primary"
-											style={{
-												margin: "5px",
-												float: "right"
-											}}>
+											style={{ margin: "5px", float: "right" }}>
 											Map Details
 										</a>
 									</div>
@@ -209,7 +196,7 @@ export default class ResourceSelector extends Component {
 					)
 				})}
 
-				{(!this.state.loading && this.state.resources.length == 0 && this.state.mymaps) && <div className="row">
+				{(!loading && resources.length == 0 && mymaps) && <div className="row">
 					<div
 						className="col-xs-12 col-sm-12 col-md-6 col-lg-6 col-md-offset-3 col-lg-offset-3 text-center">
 						<h3>{'You have not created  any maps! please create a Map'}</h3>

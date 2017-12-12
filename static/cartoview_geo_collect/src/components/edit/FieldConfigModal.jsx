@@ -26,7 +26,8 @@ const options = {
 export default class FieldConfigModal extends Component {
     constructor(props) {
         super(props)
-        this.options = this.props.options
+        const {options}=this.props
+        this.options = options
     }
     componentDidMount() {
         $(this.modal).modal('show')
@@ -41,6 +42,7 @@ export default class FieldConfigModal extends Component {
         }
     }
     render() {
+        const {fieldConfig,defaultValue}=this.props
         return (
             <div ref={(modalRef)=>this.modal=modalRef} className="modal fade" tabIndex="-1" role="dialog">
                 <div className="modal-dialog" role="document">
@@ -54,8 +56,8 @@ export default class FieldConfigModal extends Component {
                         <div className="modal-body">
                             <Form
                                 ref={(formRef)=>this.form=formRef}
-                                type={this.props.fieldConfig}
-                                value={this.props.defaultValue}
+                                type={fieldConfig}
+                                value={defaultValue}
                                 options={this.options} />
                         </div>
                         <div className="modal-footer">
@@ -72,4 +74,6 @@ FieldConfigModal.propTypes = {
     handleHideModal: PropTypes.func.isRequired,
     fieldConfig: PropTypes.func.isRequired,
     updateAttribute: PropTypes.func.isRequired,
+    defaultValue:PropTypes.object.isRequired,
+    options:PropTypes.object.isRequired
 }
